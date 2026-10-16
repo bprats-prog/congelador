@@ -1,0 +1,17 @@
+{
+  "name": "Frozen",
+  "short_name": "Frozen",
+  "description": "Inventario del congelador familiar",
+  "start_url": "/congelador/",
+  "display": "standalone",
+  "background_color": "#f1f5fb",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "il_794xN.8385283639_pez1.webp",
+      "sizes": "794x794",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ]
+}
