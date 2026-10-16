@@ -538,12 +538,30 @@ async function loadItems() {
 async function addToCompra(id) {
   const it = allItems.find(i => i.id === id);
   if (!it) return;
-  const { data: existing } = await db
-    .from('compra_list').select('id')
-    .eq('custom_name', it.name).eq('status', 'needed')
-    .maybeSingle();
+
+  // Buscar coincidencia en el catálogo de compra
+  const { data: product } = await db
+    .from('compra_products').select('id, emoji')
+    .ilike('name', it.name).maybeSingle();
+
+  // Comprobar duplicado (por product_id o por custom_name según si hay match)
+  const dupQ = db.from('compra_list').select('id').eq('status', 'needed');
+  const { data: existing } = await (product
+    ? dupQ.eq('product_id', product.id)
+    : dupQ.eq('custom_name', it.name)).maybeSingle();
   if (existing) { toast('"' + esc(it.name) + '" ya está en la lista de la compra'); return; }
-  const { error } = await db.from('compra_list').insert({ custom_name: it.name, status: 'needed' });
+
+  // Insertar con product_id si hay match, si no con nombre+emoji de categoría
+  const row = { status: 'needed' };
+  if (product) {
+    row.product_id = product.id;
+  } else {
+    const cats = getCats(it);
+    row.custom_name = it.name;
+    row.custom_emoji = cats.length ? (CMAP[cats[0]]?.e || '❄') : '❄';
+  }
+
+  const { error } = await db.from('compra_list').insert(row);
   if (!error) toast('🛒 "' + esc(it.name) + '" añadido a la lista de la compra');
 }
 
