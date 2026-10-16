@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Congelador</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap">
+<style>
+/* Layout: sticky header + filter chips + card list + fixed FAB */
+:root {
+  --bg:      #f1f5fb;
+  --bg2:     #e4ecf7;
+  --surface: #ffffff;
+  --fg:      #0d1c30;
+  --fg2:     #4d6480;
+  --accent:  #2563eb;
+  --border:  rgba(13,28,48,0.10);
+  --shadow:  0 1px 4px rgba(13,28,48,0.06), 0 3px 10px rgba(13,28,48,0.04);
+  --r:       14px;
+  --rs:      9px;
+  --font:    'DM Sans', system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:      #09162a;
+    --bg2:     #11233f;
+    --surface: #162d50;
+    --fg:      #ddeafb;
+    --fg2:     #6688aa;
+    --border:  rgba(100,150,255,0.13);
+    --shadow:  0 1px 4px rgba(0,0,0,0.3), 0 3px 10px rgba(0,0,0,0.2);
+    color-scheme: dark;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--fg);
+  margin: 0;
+  padding-inline: 16px;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* HEADER */
+header {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--bg);
+  margin-inline: -16px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.h-left { display: flex; align-items: center; gap: 11px; }
+.h-icon {
+  width: 40px; height: 40px;
+  background: var(--accent);
+  border-radius: var(--rs);
+  display: grid; place-items: center;
+  font-size: 20px; flex-shrink: 0;
+}
+h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
+.h-sub { margin-top: 2px; font-size: 0.75rem; color: var(--fg2); font-weight: 500; }
+
+.conn-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #94a3b8; flex-shrink: 0;
+  transition: background 0.4s;
+}
+.conn-dot.ok  { background: #22c55e; }
+.conn-dot.err { background: #ef4444; }
+
+/* FILTER BAR */
+.fbar {
+  display: flex; gap: 7px;
+  overflow-x: auto; scrollbar-width: none;
+  margin-inline: -16px;
+  padding: 12px 16px;
+}
+.fbar::-webkit-scrollbar { display: none; }
+.chip {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--fg2);
+  font-family: var(--font);
+  font-size: 0.79rem; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* LIST */
+#list { display: flex; flex-direction: column; gap: 9px; padding-block: 2px 110px; }
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 13px 15px;
+  display: flex; align-items: center; gap: 12px;
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.card-body { flex: 1; min-width: 0; }
+.card-name {
+  font-size: 0.94rem; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.card-cat {
+  font-size: 0.68rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--fg2); margin-top: 2px;
+}
+.qty { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.qbtn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--bg2); color: var(--fg);
+  font-size: 1.15rem; line-height: 1;
+  cursor: pointer; display: grid; place-items: center;
+  font-family: var(--font);
+}
+.qbtn:active { opacity: 0.7; }
+.qbtn.minus { color: #ef4444; border-color: #ef4444; }
+.qnum {
+  font-size: 1rem; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 22px; text-align: center;
+}
+
+/* STATE */
+.msg { text-align: center; padding: 56px 16px; color: var(--fg2); }
+.msg .mi { font-size: 2.6rem; display: block; margin-bottom: 12px; }
+.msg p { margin: 0; font-size: 0.9rem; line-height: 1.65; }
+
+/* FAB */
+.fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 999px;
+  padding: 14px 22px;
+  font-family: var(--font); font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 20px rgba(37,99,235,0.4);
+  z-index: 20;
+}
+
+/* OVERLAY / SHEET */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.48);
+  z-index: 100;
+  display: flex; align-items: flex-end;
+  backdrop-filter: blur(2px);
+}
+.sheet {
+  background: var(--surface);
+  border-radius: var(--r) var(--r) 0 0;
+  padding: 24px 20px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  width: 100%; max-width: 560px; margin: 0 auto;
+}
+.sheet h2 { margin: 0 0 20px; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; }
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; margin-bottom: 7px;
+  font-size: 0.73rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--fg2);
+}
+.field input {
+  width: 100%; padding: 12px 14px;
+  border: 1.5px solid var(--border); border-radius: var(--rs);
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font); font-size: 1rem;
+}
+.field input:focus { outline: none; border-color: var(--accent); }
+
+.cat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.copt {
+  padding: 10px 4px; border-radius: var(--rs);
+  border: 1.5px solid var(--border);
+  background: var(--bg); color: var(--fg2);
+  font-family: var(--font); font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; text-align: center;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.acts { display: flex; gap: 10px; margin-top: 22px; }
+.btn {
+  flex: 1; padding: 13px; border-radius: var(--rs); border: none;
+  font-family: var(--font); font-size: 0.95rem; font-weight: 700; cursor: pointer;
+}
+.btn-p { background: var(--accent); color: #fff; }
+.btn-g { background: var(--bg2); color: var(--fg); }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  left: 50%; transform: translateX(-50%) translateY(6px);
+  background: var(--fg); color: var(--bg);
+  padding: 9px 18px; border-radius: 999px;
+  font-size: 0.83rem; font-weight: 700;
+  opacity: 0; transition: opacity 0.18s, transform 0.18s;
+  z-index: 300; pointer-events: none; white-space: nowrap;
+}
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-left">
+    <div class="h-icon">❄️</div>
+    <div>
+      <h1>Congelador</h1>
+      <div class="h-sub" id="h-sub">Conectando…</div>
+    </div>
+  </div>
+  <div class="conn-dot" id="conn-dot"></div>
+</header>
+
+<div class="fbar" id="fbar">
+  <button class="chip active" data-cat="*">Todos</button>
+  <button class="chip" data-cat="Carnes">🥩 Carnes</button>
+  <button class="chip" data-cat="Pescado">🐟 Pescado</button>
+  <button class="chip" data-cat="Verduras">🥦 Verduras</button>
+  <button class="chip" data-cat="Pan">🍞 Pan</button>
+  <button class="chip" data-cat="Lácteos">🧀 Lácteos</button>
+  <button class="chip" data-cat="Platos preparados">🍱 Platos preparados</button>
+  <button class="chip" data-cat="Carlitos">⭐ Carlitos</button>
+  <button class="chip" data-cat="Otros">📦 Otros</button>
+</div>
+
+<div id="list-wrap">
+  <div class="msg"><span class="mi">❄️</span><p>Conectando…</p></div>
+</div>
+
+<button class="fab" id="fab">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+  Añadir
+</button>
+
+<!-- Add sheet -->
+<div class="overlay" id="add-ov" hidden>
+  <div class="sheet">
+    <h2>Añadir al congelador</h2>
+    <div class="field">
+      <label for="f-name">Nombre</label>
+      <input id="f-name" type="text" placeholder="Pollo, merluza, espinacas…" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="f-qty">Cantidad</label>
+      <input id="f-qty" type="number" min="1" max="99" value="1">
+    </div>
+    <div class="field">
+      <label>Categoría</label>
+      <div class="cat-grid" id="cat-grid"></div>
+    </div>
+    <div class="acts">
+      <button class="btn btn-g" id="add-cancel">Cancelar</button>
+      <button class="btn btn-p" id="add-ok">Añadir</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL  = 'https://zfqpupvarjbwgcmiomcs.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmcXB1cHZhcmpid2djbWlvbWNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NDE1MzIsImV4cCI6MjEwNTMxNzUzMn0.nDbpkU0g3Qxp51NDJ_sgCYA17kj2fSDCXmkUHws0_jE';
+const TABLE = 'congelador_items';
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const CATS = [
+  { id:'Carnes',            e:'🥩', c:'#f97316' },
+  { id:'Pescado',           e:'🐟', c:'#3b82f6' },
+  { id:'Verduras',          e:'🥦', c:'#22c55e' },
+  { id:'Pan',               e:'🍞', c:'#a78bfa' },
+  { id:'Lácteos',           e:'🧀', c:'#f59e0b' },
+  { id:'Platos preparados', e:'🍱', c:'#14b8a6' },
+  { id:'Carlitos',          e:'⭐', c:'#ec4899' },
+  { id:'Otros',             e:'📦', c:'#6b7280' },
+];
+const CMAP = Object.fromEntries(CATS.map(c => [c.id, c]));
+
+let allItems = [], activeFilter = '*', selCat = 'Carnes';
+
+// toast
+let tt;
+function toast(m) {
+  const el = document.getElementById('toast');
+  el.textContent = m; el.classList.add('on');
+  clearTimeout(tt); tt = setTimeout(() => el.classList.remove('on'), 2300);
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+// render
+function render() {
+  const vis = activeFilter === '*' ? allItems : allItems.filter(i => i.category === activeFilter);
+  const n = allItems.length;
+  document.getElementById('h-sub').textContent =
+    n === 0 ? 'Vacío' : n === 1 ? '1 producto' : n + ' productos';
+
+  const wrap = document.getElementById('list-wrap');
+  if (vis.length === 0) {
+    const cat = CMAP[activeFilter];
+    wrap.innerHTML = '<div class="msg"><span class="mi">' +
+      (activeFilter === '*' ? '❄️' : (cat?.e || '📦')) + '</span><p>' +
+      (activeFilter === '*'
+        ? 'El congelador está vacío.<br>Pulsa <strong>Añadir</strong> para empezar.'
+        : 'Ningún producto en esta categoría.') +
+      '</p></div>';
+    return;
+  }
+  wrap.innerHTML = '<div id="list">' + vis.map(it => {
+    const cat = CMAP[it.category] || CMAP['Otros'];
+    return '<div class="card">' +
+      '<div class="dot" style="background:' + cat.c + '"></div>' +
+      '<div class="card-body">' +
+        '<div class="card-name">' + esc(it.name) + '</div>' +
+        '<div class="card-cat">' + esc(it.category) + '</div>' +
+      '</div>' +
+      '<div class="qty">' +
+        '<button class="qbtn minus" data-id="' + it.id + '" data-d="-1">−</button>' +
+        '<span class="qnum">' + it.quantity + '</span>' +
+        '<button class="qbtn" data-id="' + it.id + '" data-d="1">+</button>' +
+      '</div>' +
+    '</div>';
+  }).join('') + '</div>';
+
+  wrap.querySelectorAll('[data-d]').forEach(b => {
+    b.addEventListener('click', () => chQty(b.dataset.id, +b.dataset.d));
+  });
+}
+
+// load all items
+async function loadItems() {
+  const { data, error } = await db
+    .from(TABLE)
+    .select('*')
+    .order('added_at', { ascending: true });
+  if (!error) { allItems = data || []; render(); }
+}
+
+// quantity change
+async function chQty(id, delta) {
+  const it = allItems.find(i => i.id === id);
+  if (!it) return;
+  const nq = it.quantity + delta;
+  if (nq <= 0) {
+    await db.from(TABLE).delete().eq('id', id);
+    toast('"' + it.name + '" eliminado');
+  } else {
+    await db.from(TABLE).update({ quantity: nq }).eq('id', id);
+  }
+}
+
+// filter chips
+document.getElementById('fbar').addEventListener('click', e => {
+  const chip = e.target.closest('[data-cat]');
+  if (!chip) return;
+  activeFilter = chip.dataset.cat;
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === chip));
+  render();
+});
+
+// category selector
+function buildCats() {
+  document.getElementById('cat-grid').innerHTML = CATS.map(c =>
+    '<button class="copt" data-cat="' + c.id + '">' + c.e + ' ' + c.id + '</button>'
+  ).join('');
+  refreshCatStyles();
+  document.getElementById('cat-grid').addEventListener('click', e => {
+    const b = e.target.closest('[data-cat]');
+    if (b) { selCat = b.dataset.cat; refreshCatStyles(); }
+  });
+}
+
+function refreshCatStyles() {
+  document.querySelectorAll('.copt').forEach(b => {
+    const active = b.dataset.cat === selCat;
+    const col = CMAP[b.dataset.cat]?.c || '#6b7280';
+    b.style.borderColor = active ? col : '';
+    b.style.color       = active ? col : '';
+    b.style.background  = active ? col + '1a' : '';
+  });
+}
+
+// add sheet
+document.getElementById('fab').addEventListener('click', () => {
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-qty').value = '1';
+  refreshCatStyles();
+  document.getElementById('add-ov').hidden = false;
+  setTimeout(() => document.getElementById('f-name').focus(), 60);
+});
+document.getElementById('add-cancel').addEventListener('click', () => {
+  document.getElementById('add-ov').hidden = true;
+});
+document.getElementById('add-ov').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.hidden = true;
+});
+document.getElementById('f-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('add-ok').click();
+});
+document.getElementById('add-ok').addEventListener('click', async () => {
+  const name = document.getElementById('f-name').value.trim();
+  const qty  = Math.max(1, parseInt(document.getElementById('f-qty').value) || 1);
+  if (!name) { document.getElementById('f-name').focus(); return; }
+  const btn = document.getElementById('add-ok');
+  btn.disabled = true;
+  try {
+    const { error } = await db.from(TABLE).insert({
+      name, quantity: qty, category: selCat,
+      added_at: Date.now()
+    });
+    if (!error) {
+      document.getElementById('add-ov').hidden = true;
+      toast('"' + name + '" añadido ✓');
+    }
+  } finally { btn.disabled = false; }
+});
+
+// realtime subscription
+function subscribe() {
+  db.channel('congelador')
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: TABLE },
+      () => loadItems()
+    )
+    .subscribe(status => {
+      const dot = document.getElementById('conn-dot');
+      if (status === 'SUBSCRIBED') {
+        dot.className = 'conn-dot ok';
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        dot.className = 'conn-dot err';
+      }
+    });
+}
+
+// init
+buildCats();
+loadItems().then(subscribe);
+</script>
+</body>
+</html>
