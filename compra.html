@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lista de la compra</title>
+<link rel="manifest" href="compra-manifest.json">
+<link rel="icon" href="compra-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="compra-icon.svg">
+<meta name="theme-color" content="#252B3B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Compra">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
 <style>
 :root {
@@ -445,11 +452,16 @@ async function init() {
     renderCatalog();
   });
   document.getElementById('searchInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      // Si no hay resultados exactos en catálogo → añadir como custom
-      const inListIds = new Set(S.listItems.map(i => i.product_id));
-      const matches = S.products.filter(p => !inListIds.has(p.id) && p.name.toLowerCase().includes(S.search));
-      if (S.search && !matches.find(p => p.name.toLowerCase() === S.search)) addCustomFromSearch();
+    if (e.key !== 'Enter' || !S.search) return;
+    e.preventDefault();
+    const inListIds = new Set(S.listItems.map(i => i.product_id));
+    const available = S.products.filter(p => !inListIds.has(p.id) && p.name.toLowerCase().includes(S.search));
+    if (available.length === 1) {
+      // Una sola coincidencia → añadirla directamente
+      addToList(available[0].id).then(clearSearch);
+    } else {
+      // Ninguna o varias → añadir como custom
+      addCustomFromSearch();
     }
   });
 }
@@ -707,11 +719,14 @@ async function clearPurchased() {
 }
 
 async function addCustomFromSearch() {
-  const name = S.search.trim();
-  if (!name) return;
+  const raw = document.getElementById('searchInput').value.trim();
+  if (!raw) return;
+  // Capitalizar primera letra, resto respeta lo que escribió el usuario
+  const name = raw.charAt(0).toUpperCase() + raw.slice(1);
+  const emoji = guessEmoji(raw); // guessEmoji normaliza internamente
 
   const { data: prod, error } = await db.from('compra_products')
-    .insert({ name, emoji: guessEmoji(name), is_custom: true })
+    .insert({ name, emoji, is_custom: true })
     .select('id')
     .single();
   if (error) { showToast('Error al crear producto'); return; }

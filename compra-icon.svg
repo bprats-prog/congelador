@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fondo redondeado estilo iOS -->
+  <rect width="512" height="512" rx="110" fill="#252B3B"/>
+  <!-- Sombra suave interior -->
+  <rect width="512" height="512" rx="110" fill="url(#g)" opacity="0.3"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="white"/>
+      <stop offset="100%" stop-color="black"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Asa del carrito (brazo izquierdo) -->
+  <line x1="88" y1="128" x2="88" y2="192"
+    stroke="white" stroke-width="40" stroke-linecap="round"/>
+  <!-- Codo del asa -->
+  <line x1="88" y1="192" x2="160" y2="192"
+    stroke="white" stroke-width="40" stroke-linecap="round"/>
+
+  <!-- Cuerpo del carrito: contorno superior + brazo diagonal hasta cesta -->
+  <polyline points="160,192 210,380 420,380 460,240 160,240"
+    stroke="white" stroke-width="40" fill="none"
+    stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Línea horizontal de la cesta (barra de apoyo) -->
+  <line x1="222" y1="280" x2="450" y2="280"
+    stroke="white" stroke-width="20" stroke-linecap="round" opacity="0.45"/>
+
+  <!-- Rueda izquierda -->
+  <circle cx="264" cy="448" r="48" fill="white"/>
+  <circle cx="264" cy="448" r="24" fill="#252B3B"/>
+
+  <!-- Rueda derecha -->
+  <circle cx="388" cy="448" r="48" fill="white"/>
+  <circle cx="388" cy="448" r="24" fill="#252B3B"/>
+</svg>
