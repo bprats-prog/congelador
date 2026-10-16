@@ -239,6 +239,22 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
 .copt.sel .check { opacity: 1; }
 .cat-error { font-size: 0.72rem; color: #ef4444; margin-top: 7px; display: none; }
 
+/* drawer selector */
+.drawer-row { display: flex; gap: 8px; }
+.dopt {
+  flex: 1; padding: 11px 4px; border-radius: var(--rs);
+  border: 1.5px solid var(--border); background: var(--bg); color: var(--fg2);
+  font-family: var(--font); font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; text-align: center;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+.dopt.sel { border-color: #6366f1; color: #6366f1; background: #6366f11a; }
+.drawer-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 0.68rem; font-weight: 700; color: #6366f1;
+  text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px;
+}
+
 .acts { display: flex; gap: 10px; margin-top: 22px; }
 .btn {
   flex: 1; padding: 13px; border-radius: var(--rs); border: none;
@@ -332,6 +348,14 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
       </div>
     </div>
     <div class="field">
+      <label>Cajón <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
+      <div class="drawer-row" id="drawer-row">
+        <button class="dopt" data-drawer="1">📦 1er cajón</button>
+        <button class="dopt" data-drawer="2">📦 2º cajón</button>
+        <button class="dopt" data-drawer="3">📦 3er cajón</button>
+      </div>
+    </div>
+    <div class="field">
       <label for="f-date">Fecha de congelado</label>
       <input id="f-date" type="date">
       <p class="hint">Opcional — muestra la antigüedad en la tarjeta</p>
@@ -373,8 +397,10 @@ const CMAP = Object.fromEntries(CATS.map(c => [c.id, c]));
 
 const UNIT_STEP = { uds: 1, bolsas: 1, kg: 0.1, g: 50, litros: 0.25 };
 
+const DRAWERS = { '1': '1er cajón', '2': '2º cajón', '3': '3er cajón' };
+
 let allItems = [], activeFilter = '*', searchQ = '', editingId = null;
-let selCats = new Set();
+let selCats = new Set(), selDrawer = null;
 
 // ── edad de congelado ──────────────────────────────────────────────
 function ageInfo(frozenAt) {
@@ -456,6 +482,10 @@ function render() {
       ? '<div class="frozen-tag" style="color:' + age.color + '">❄ ' + esc(age.label) + '</div>'
       : '';
 
+    const drawerHtml = it.drawer
+      ? '<div class="drawer-badge">📦 ' + esc(DRAWERS[it.drawer] || it.drawer) + '</div>'
+      : '';
+
     const lowBadge = isLow
       ? ' <span style="color:#ef4444;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em">· ¡Último!</span>'
       : '';
@@ -465,6 +495,7 @@ function render() {
       '<div class="card-body">' +
         '<div class="card-name">' + esc(it.name) + lowBadge + '</div>' +
         '<div class="card-cats">' + esc(cats.join(' · ')) + '</div>' +
+        drawerHtml +
         frozenHtml +
       '</div>' +
       '<div class="qty">' +
@@ -556,14 +587,22 @@ function refreshCatStyles() {
 }
 
 // ── open sheet (add / edit) ────────────────────────────────────────
-function openSheet({ name = '', qty = 1, unit = 'uds', date = todayISO(), cats = new Set(), id = null } = {}) {
+function refreshDrawerStyles() {
+  document.querySelectorAll('.dopt').forEach(b => {
+    b.classList.toggle('sel', b.dataset.drawer === selDrawer);
+  });
+}
+
+function openSheet({ name = '', qty = 1, unit = 'uds', date = todayISO(), cats = new Set(), drawer = null, id = null } = {}) {
   editingId = id;
   document.getElementById('f-name').value  = name;
   document.getElementById('f-qty').value   = qty;
   document.getElementById('f-unit').value  = unit;
   document.getElementById('f-date').value  = date;
   selCats = new Set(cats);
+  selDrawer = drawer;
   refreshCatStyles();
+  refreshDrawerStyles();
   document.getElementById('cat-error').style.display = 'none';
   document.getElementById('sheet-title').textContent = id ? 'Editar producto' : 'Añadir al congelador';
   document.getElementById('add-ok').textContent      = id ? 'Guardar cambios' : 'Añadir';
@@ -577,15 +616,23 @@ function openEdit(id) {
   if (!it) return;
   openSheet({
     id,
-    name: it.name,
-    qty:  it.quantity,
-    unit: it.unit || 'uds',
-    date: it.frozen_at ? new Date(it.frozen_at).toISOString().split('T')[0] : '',
-    cats: new Set(getCats(it)),
+    name:   it.name,
+    qty:    it.quantity,
+    unit:   it.unit || 'uds',
+    date:   it.frozen_at ? new Date(it.frozen_at).toISOString().split('T')[0] : '',
+    cats:   new Set(getCats(it)),
+    drawer: it.drawer || null,
   });
 }
 
 document.getElementById('fab').addEventListener('click', () => openSheet());
+
+document.getElementById('drawer-row').addEventListener('click', e => {
+  const b = e.target.closest('[data-drawer]');
+  if (!b) return;
+  selDrawer = selDrawer === b.dataset.drawer ? null : b.dataset.drawer; // toggle off si ya estaba
+  refreshDrawerStyles();
+});
 
 document.getElementById('add-cancel').addEventListener('click', () => {
   document.getElementById('add-ov').hidden = true;
@@ -632,6 +679,7 @@ document.getElementById('add-ok').addEventListener('click', async () => {
         name, quantity: qty, unit,
         categories: Array.from(selCats),
         frozen_at: frozenAt,
+        drawer: selDrawer,
       }).eq('id', editingId);
       if (!error) {
         document.getElementById('add-ov').hidden = true;
@@ -642,6 +690,7 @@ document.getElementById('add-ok').addEventListener('click', async () => {
         name, quantity: qty, unit,
         categories: Array.from(selCats),
         frozen_at:  frozenAt,
+        drawer:     selDrawer,
         added_at:   Date.now(),
       });
       if (!error) {
