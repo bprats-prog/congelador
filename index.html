@@ -142,9 +142,11 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .card-cats {
-  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.07em; color: var(--fg2); margin-top: 2px;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px;
+}
+.cat-tag {
+  font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: 2px 7px; border-radius: 999px; line-height: 1.5; white-space: nowrap;
 }
 .frozen-tag {
   display: inline-flex; align-items: center; gap: 3px;
@@ -506,7 +508,10 @@ function render() {
       '<div class="dots">' + dots + '</div>' +
       '<div class="card-body">' +
         '<div class="card-name">' + esc(it.name) + lowBadge + '</div>' +
-        '<div class="card-cats">' + esc(cats.join(' · ')) + '</div>' +
+        '<div class="card-cats">' + cats.map(id => {
+          const c = CMAP[id]; if (!c) return '';
+          return '<span class="cat-tag" style="color:' + c.c + ';background:' + c.c + '22">' + c.e + ' ' + esc(c.id) + '</span>';
+        }).join('') + '</div>' +
         drawerHtml +
         frozenHtml +
       '</div>' +
