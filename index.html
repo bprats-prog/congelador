@@ -246,6 +246,12 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
 }
 .btn-p { background: var(--accent); color: #fff; }
 .btn-g { background: var(--bg2); color: var(--fg); }
+.btn-danger {
+  width: 100%; padding: 13px; border-radius: var(--rs); border: none;
+  font-family: var(--font); font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  background: transparent; color: #ef4444; margin-top: 10px;
+  border: 1.5px solid #ef4444;
+}
 
 /* TOAST */
 .toast {
@@ -339,6 +345,7 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
       <button class="btn btn-g" id="add-cancel">Cancelar</button>
       <button class="btn btn-p" id="add-ok">Añadir</button>
     </div>
+    <button class="btn-danger" id="delete-btn" hidden>Eliminar producto</button>
   </div>
 </div>
 
@@ -560,6 +567,7 @@ function openSheet({ name = '', qty = 1, unit = 'uds', date = todayISO(), cats =
   document.getElementById('cat-error').style.display = 'none';
   document.getElementById('sheet-title').textContent = id ? 'Editar producto' : 'Añadir al congelador';
   document.getElementById('add-ok').textContent      = id ? 'Guardar cambios' : 'Añadir';
+  document.getElementById('delete-btn').hidden = !id;
   document.getElementById('add-ov').hidden = false;
   setTimeout(() => document.getElementById('f-name').focus(), 60);
 }
@@ -581,6 +589,19 @@ document.getElementById('fab').addEventListener('click', () => openSheet());
 
 document.getElementById('add-cancel').addEventListener('click', () => {
   document.getElementById('add-ov').hidden = true;
+});
+
+document.getElementById('delete-btn').addEventListener('click', async () => {
+  if (!editingId) return;
+  const it = allItems.find(i => i.id === editingId);
+  const btn = document.getElementById('delete-btn');
+  btn.disabled = true;
+  const { error } = await db.from(TABLE).delete().eq('id', editingId);
+  btn.disabled = false;
+  if (!error) {
+    document.getElementById('add-ov').hidden = true;
+    toast((it ? '"' + it.name + '"' : 'Producto') + ' eliminado');
+  }
 });
 document.getElementById('add-ov').addEventListener('click', e => {
   if (e.target === e.currentTarget) e.currentTarget.hidden = true;
