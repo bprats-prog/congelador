@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lista de la compra</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
+<style>
+:root {
+  --bg:      #252B3B;
+  --bg2:     #1C2232;
+  --surface: #2F3749;
+  --fg:      #F0F4FF;
+  --fg2:     #8A9BBD;
+  --border:  rgba(255,255,255,0.07);
+  --red:     #E8594A;
+  --red-d:   #C94535;
+  --green:   #3DBE7A;
+  --green-d: #2DA067;
+  --teal:    #2FBFAA;
+  --teal-d:  #22A08E;
+  --font:    'DM Sans', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); }
+body {
+  font-family: var(--font);
+  color: var(--fg);
+  overscroll-behavior-y: none;
+}
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(150deg, #1a2035 0%, #2a3555 100%);
+  padding: 20px 20px 16px;
+  padding-top: max(env(safe-area-inset-top), 20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.hdr-left { flex: 1; }
+.hdr-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+}
+.hdr-title span { opacity: 0.85; }
+.avatars {
+  display: flex;
+  margin-top: 6px;
+}
+.avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid #1a2035;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700; color: #fff;
+  margin-left: -6px;
+}
+.avatar:first-child { margin-left: 0; }
+.hdr-illo { font-size: 3rem; opacity: 0.6; flex-shrink: 0; }
+
+/* ── SEARCH ── */
+.search-row {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 1rem;
+  pointer-events: none;
+  opacity: 0.5;
+}
+.search-input {
+  width: 100%;
+  padding: 11px 14px 11px 40px;
+  background: var(--surface);
+  border: none;
+  border-radius: 12px;
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 0.95rem;
+  outline: none;
+  -webkit-appearance: none;
+}
+.search-input::placeholder { color: var(--fg2); }
+.search-clear {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--fg2);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px;
+  display: none;
+}
+
+/* ── SECTION ── */
+.section { padding: 14px 14px 6px; }
+.section-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.badge {
+  background: var(--red);
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.btn-sm {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--fg2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font);
+  white-space: nowrap;
+}
+.btn-sm:active { opacity: 0.6; }
+
+/* ── CARD GRID ── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 9px;
+}
+
+/* ── CARD ── */
+.card {
+  aspect-ratio: 1;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, filter 0.15s;
+  padding: 6px 4px;
+  position: relative;
+  overflow: hidden;
+}
+.card:active { transform: scale(0.90); }
+
+.card-emoji {
+  font-size: 2.1rem;
+  line-height: 1;
+  /* white line-art feel via brightness filter on emoji */
+  filter: brightness(10) saturate(0);
+}
+.card-name {
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
+  text-align: center;
+  line-height: 1.2;
+  hyphens: auto;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Card color states */
+.card-needed  { background: var(--red); }
+.card-needed:active { background: var(--red-d); }
+
+.card-purchased {
+  background: var(--green);
+  opacity: 0.82;
+}
+.card-purchased:active { background: var(--green-d); }
+.card-purchased .card-emoji { opacity: 0.7; }
+
+.check-badge {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  background: rgba(0,0,0,0.15);
+  border-radius: 50%;
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.card-cat:active { filter: brightness(0.85); }
+
+.card-add-custom {
+  background: #3a3f55;
+  border: 2px dashed rgba(255,255,255,0.2);
+}
+.card-add-custom:active { background: #4a5070; }
+
+/* ── CATEGORY PILLS ── */
+.pills-row {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 4px 14px 10px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.pills-row::-webkit-scrollbar { display: none; }
+.pill {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--fg2);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.pill.active {
+  background: var(--teal);
+  color: #fff;
+}
+
+/* ── EMPTY ── */
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px 16px;
+  color: var(--fg2);
+  font-size: 0.88rem;
+}
+
+/* ── ADD CUSTOM ── */
+.add-custom {
+  display: flex;
+  gap: 8px;
+  padding: 6px 14px 14px;
+}
+.custom-input {
+  flex: 1;
+  padding: 11px 14px;
+  background: var(--surface);
+  border: none;
+  border-radius: 12px;
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  outline: none;
+  -webkit-appearance: none;
+}
+.custom-input::placeholder { color: var(--fg2); }
+.btn-add {
+  padding: 11px 18px;
+  background: var(--teal);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-add:active { background: var(--teal-d); }
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 14px 0;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: max(env(safe-area-inset-bottom), 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: #fff;
+  color: #252B3B;
+  padding: 9px 20px;
+  border-radius: 24px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 200;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── LOADING ── */
+#loading {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 12px;
+  z-index: 999;
+}
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--teal);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading p { color: var(--fg2); font-size: 0.88rem; }
+
+.bottom-pad { height: max(env(safe-area-inset-bottom), 20px); }
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p>Cargando lista…</p>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="hdr-left">
+    <div class="hdr-title">🛒 <span>Lista de la compra</span></div>
+    <div class="avatars">
+      <div class="avatar" style="background:#E8594A">B</div>
+      <div class="avatar" style="background:#2FBFAA">F</div>
+    </div>
+  </div>
+  <div class="hdr-illo">🏡</div>
+</header>
+
+<!-- Search -->
+<div class="search-row">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" type="search" placeholder="¿Qué deseas comprar?" autocomplete="off" autocorrect="off">
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+  </div>
+</div>
+
+<!-- Active list -->
+<div class="section" id="listSection">
+  <div class="section-hdr">
+    <span class="section-label">
+      En tu lista
+      <span class="badge" id="listBadge" hidden>0</span>
+    </span>
+    <span id="clearBtn" hidden></span>
+  </div>
+  <div class="card-grid" id="listGrid">
+    <div class="empty">Tu lista está vacía — añade productos abajo</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Browse catalog -->
+<div class="section">
+  <div class="section-hdr">
+    <span class="section-label" id="catalogLabel">Utilizados frecuentemente</span>
+  </div>
+</div>
+
+<!-- Category pills -->
+<div class="pills-row" id="pillsRow">
+  <button class="pill active" data-cat="all" onclick="filterCat('all')">Todo</button>
+</div>
+
+<!-- Catalog grid -->
+<div class="section">
+  <div class="card-grid" id="catalogGrid">
+    <div class="empty">Cargando catálogo…</div>
+  </div>
+</div>
+
+<div class="bottom-pad"></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ── CONFIG ── */
+const SUPABASE_URL  = 'https://zfqpupvarjbwgcmiomcs.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmcXB1cHZhcmpid2djbWlvbWNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NDE1MzIsImV4cCI6MjEwNTMxNzUzMn0.nDbpkU0g3Qxp51NDJ_sgCYA17kj2fSDCXmkUHws0_jE';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+/* ── STATE ── */
+const S = {
+  categories: [],
+  products:   [],
+  listItems:  [],
+  activeCat:  'all',
+  search:     '',
+};
+
+/* ── INIT ── */
+async function init() {
+  await loadAll();
+  setupRealtime();
+  render();
+  document.getElementById('loading').style.display = 'none';
+
+  document.getElementById('searchInput').addEventListener('input', e => {
+    S.search = e.target.value.trim().toLowerCase();
+    document.getElementById('searchClear').style.display = S.search ? 'flex' : 'none';
+    renderCatalog();
+  });
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      // Si no hay resultados exactos en catálogo → añadir como custom
+      const inListIds = new Set(S.listItems.map(i => i.product_id));
+      const matches = S.products.filter(p => !inListIds.has(p.id) && p.name.toLowerCase().includes(S.search));
+      if (S.search && !matches.find(p => p.name.toLowerCase() === S.search)) addCustomFromSearch();
+    }
+  });
+}
+
+async function loadAll() {
+  const [catR, prodR, listR] = await Promise.all([
+    db.from('compra_categories').select('*').order('sort_order'),
+    db.from('compra_products').select('*, compra_categories(color)').order('use_count', { ascending: false }).order('name'),
+    db.from('compra_list').select('*, compra_products(id,name,emoji,compra_categories(color))').order('added_at'),
+  ]);
+  S.categories = catR.data || [];
+  S.products   = prodR.data || [];
+  S.listItems  = listR.data || [];
+}
+
+/* ── REALTIME ── */
+function setupRealtime() {
+  db.channel('compra_rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'compra_list' }, async () => {
+      const { data } = await db.from('compra_list')
+        .select('*, compra_products(id,name,emoji,compra_categories(color))')
+        .order('added_at');
+      S.listItems = data || [];
+      render();
+    })
+    .subscribe();
+}
+
+/* ── EMOJI GUESSER ── */
+function guessEmoji(name) {
+  // Normaliza: minúsculas + sin tildes
+  const n = name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+  const rules = [
+    // Frutas
+    [/manzana/,                     '🍎'],
+    [/platano|banana/,              '🍌'],
+    [/naranja/,                     '🍊'],
+    [/limon/,                       '🍋'],
+    [/mandarina|clementina/,        '🍊'],
+    [/uva/,                         '🍇'],
+    [/fresa|fresón/,                '🍓'],
+    [/frambuesa/,                   '🍓'],
+    [/pera/,                        '🍐'],
+    [/sandia/,                      '🍉'],
+    [/melon/,                       '🍈'],
+    [/kiwi/,                        '🥝'],
+    [/mango/,                       '🥭'],
+    [/pina|ananas/,                 '🍍'],
+    [/melocot|nectarina/,           '🍑'],
+    [/cereza|guinda/,               '🍒'],
+    [/arandano|arandanos/,          '🫐'],
+    [/ciruela/,                     '🫐'],
+    [/coco/,                        '🥥'],
+    [/higo/,                        '🍇'],
+    [/datil/,                       '🌴'],
+    // Verduras y hortalizas
+    [/aguacate/,                    '🥑'],
+    [/tomate/,                      '🍅'],
+    [/zanahoria/,                   '🥕'],
+    [/brocoli|brocol/,              '🥦'],
+    [/coliflor/,                    '🥦'],
+    [/cebolla/,                     '🧅'],
+    [/ajo/,                         '🧄'],
+    [/patata|papa/,                 '🥔'],
+    [/pimiento/,                    '🫑'],
+    [/pepino/,                      '🥒'],
+    [/calabacin/,                   '🥒'],
+    [/lechuga|escarola|rucula|ensalada/, '🥬'],
+    [/espinaca/,                    '🥬'],
+    [/acelga/,                      '🥬'],
+    [/col |repollo/,                '🥬'],
+    [/berenjena/,                   '🍆'],
+    [/maiz/,                        '🌽'],
+    [/champin|seta|portobello/,     '🍄'],
+    [/puerro/,                      '🌿'],
+    [/apio/,                        '🌿'],
+    [/esparrago/,                   '🌿'],
+    [/judia|judias/,                '🫛'],
+    [/guisante/,                    '🫛'],
+    [/calabaza/,                    '🎃'],
+    [/nabo|rabano/,                 '🌿'],
+    [/perejil|cilantro|oregano|albahaca|romero|tomillo/, '🌿'],
+    [/alubia|garbanzo|lenteja|legumbre/, '🫘'],
+    // Lácteos y huevos
+    [/leche/,                       '🥛'],
+    [/yogur/,                       '🫙'],
+    [/mantequilla|manteca/,         '🧈'],
+    [/queso/,                       '🧀'],
+    [/huevo/,                       '🥚'],
+    [/crema hidratan|crema facial|crema corporal|crema de manos|crema solar/, '🧴'],
+    [/nata|crema|crème/,            '🫗'],
+    [/requeson|ricota|cottage/,     '🫙'],
+    // Carnes
+    [/pollo/,                       '🍗'],
+    [/pavo/,                        '🍗'],
+    [/pato|codorniz|conejo/,        '🍗'],
+    [/ternera|vaca|buey/,           '🥩'],
+    [/cerdo|lomo|solomillo/,        '🥓'],
+    [/jamon/,                       '🍖'],
+    [/chorizo|salchich|frankfurt/,  '🌭'],
+    [/costill|chulet|rabo/,         '🍖'],
+    [/hamburguesa/,                 '🍔'],
+    [/mortadela|fuet|salami|embutido/, '🍖'],
+    // Pescados y mariscos
+    [/salmon/,                      '🐟'],
+    [/atun/,                        '🐟'],
+    [/merluza|bacalao|lubina|dorada|boqueron|sardina|anchoa/, '🐠'],
+    [/gamba|langostino|langosta/,   '🦐'],
+    [/mejillon|berberecho|almeja|ostra/, '🦪'],
+    [/sepia|calamar|pulpo/,         '🦑'],
+    [/cangrejo/,                    '🦀'],
+    [/marisco/,                     '🦞'],
+    // Pan y cereales
+    [/baguette|baguete/,            '🥖'],
+    [/pan de mol/,                  '🍞'],
+    [/pan /,                        '🥖'],
+    [/tostada|tostado/,             '🍞'],
+    [/cereal/,                      '🥣'],
+    [/avena/,                       '🌾'],
+    [/cracker/,                     '🫓'],
+    [/croissant/,                   '🥐'],
+    [/magdalena|muffin|cupcake/,    '🧁'],
+    [/bollo|brioche/,               '🥐'],
+    // Pasta, arroz y legumbres
+    [/espagueti|spaghetti|pasta|tallar|fideo|macarron|penne|rigat|lasan|raviol|cannelloni/, '🍝'],
+    [/arroz/,                       '🍚'],
+    [/quinoa/,                      '🌾'],
+    [/cuscus|couscous/,             '🍚'],
+    // Conservas y despensa
+    [/aceite/,                      '🫙'],
+    [/sal$/,                        '🧂'],
+    [/ sal /,                       '🧂'],
+    [/azucar/,                      '🫙'],
+    [/harina/,                      '🌾'],
+    [/levadura/,                    '🌾'],
+    [/mayonesa/,                    '🫙'],
+    [/ketchup/,                     '🍅'],
+    [/mostaza/,                     '🫙'],
+    [/aceituna/,                    '🫒'],
+    [/vinagre/,                     '🫙'],
+    [/miel/,                        '🍯'],
+    [/mermelada|confitura/,         '🫙'],
+    [/conserva|en lata|en bote/,    '🥫'],
+    [/caldo|bouillon/,              '🍲'],
+    [/sopa/,                        '🍲'],
+    [/salsa/,                       '🫙'],
+    [/especias|curry|pimienta/,     '🫙'],
+    // Bebidas
+    [/agua/,                        '💧'],
+    [/zumo|jugo/,                   '🧃'],
+    [/batido|smoothie/,             '🥤'],
+    [/refresco|cola|fanta|sprite/,  '🥤'],
+    [/cafe/,                        '☕'],
+    [/te |infusion|manzanilla|poleo/, '🍵'],
+    [/vino/,                        '🍷'],
+    [/cerveza/,                     '🍺'],
+    [/cava|champan|prosecco/,       '🥂'],
+    [/whisky|bourbon|ron |vodka|gin |licor/, '🥃'],
+    [/leche (vegetal|avena|almendra|soja|coco|arroz)/, '🥛'],
+    // Snacks y dulces
+    [/galleta/,                     '🍪'],
+    [/chocolate|cacao/,             '🍫'],
+    [/patatas frit|chips/,          '🥔'],
+    [/almendra|nuez|pistacho|cacahuete|anacardo|frutos? seco/, '🥜'],
+    [/palomita/,                    '🍿'],
+    [/natilla|pudding|mousse/,      '🍮'],
+    [/gominola|caramelo|candy/,     '🍬'],
+    [/helado/,                      '🍦'],
+    [/tarta|bizcocho|cake/,         '🍰'],
+    [/donut|rosquill/,              '🍩'],
+    [/barrita/,                     '🍫'],
+    // Higiene
+    [/champu/,                      '🧴'],
+    [/gel de ducha|gel corporal/,   '🧴'],
+    [/jabon/,                       '🧼'],
+    [/desodorante/,                 '🧴'],
+    [/pasta de dientes|dentifrico/,  '🪥'],
+    [/cepillo de dientes/,          '🪥'],
+    [/papel higienico|papel de wc/, '🧻'],
+    [/compresas|tampones/,          '🩸'],
+    [/maquinilla|cuchilla de afeitar/, '🪒'],
+    [/colonia|perfume/,             '🧴'],
+    [/panal|panales/,               '🩲'],
+    [/toallita|kleenex|panuelo de papel|facial tissue/, '🧻'],
+    [/crema|locion|serum/,          '🧴'],
+    [/hilo dental/,                 '🪥'],
+    // Limpieza
+    [/detergente/,                  '🫧'],
+    [/suavizante/,                  '🫙'],
+    [/limpiahogar|limpiador multiusos/, '🧹'],
+    [/friegasuelos/,                '🧹'],
+    [/bayeta|estropajo|fregona|escobilla/, '🧽'],
+    [/esponja/,                     '🧽'],
+    [/bolsa(s)? (de )?basura/,      '🗑️'],
+    [/papel de cocina|rollo cocina/, '🧻'],
+    [/lavavajillas/,                '🫧'],
+    [/lejia/,                       '🧴'],
+    [/desengrasante/,               '🧹'],
+    // Congelados
+    [/pizza/,                       '🍕'],
+    [/croqueta/,                    '🍘'],
+    [/empanadilla/,                 '🥟'],
+  ];
+
+  for (const [re, emoji] of rules) {
+    if (re.test(n)) return emoji;
+  }
+  return '🛒';
+}
+
+/* ── ACTIONS ── */
+const _purchasedTimers = new Map();
+
+async function addToList(productId) {
+  if (S.listItems.find(i => i.product_id === productId)) return;
+  const { error } = await db.from('compra_list').insert({ product_id: productId, status: 'needed' });
+  if (error) { showToast('Error al añadir'); return; }
+  // Incrementar popularidad para mejorar sugerencias futuras
+  await db.from('compra_products').update({ use_count: (S.products.find(p => p.id === productId)?.use_count || 0) + 1 }).eq('id', productId);
+  const prod = S.products.find(p => p.id === productId);
+  if (prod) prod.use_count = (prod.use_count || 0) + 1;
+}
+
+async function togglePurchased(itemId) {
+  const item = S.listItems.find(i => i.id === itemId);
+  if (!item) return;
+
+  if (item.status === 'needed') {
+    // Flash verde → auto-borrar en 900 ms
+    item.status = 'purchased';
+    renderList();
+    await db.from('compra_list').update({ status: 'purchased', updated_at: new Date().toISOString() }).eq('id', itemId);
+    const t = setTimeout(() => { _purchasedTimers.delete(itemId); removeFromList(itemId); }, 900);
+    _purchasedTimers.set(itemId, t);
+  } else {
+    // Tap mientras está verde → deshacer
+    clearTimeout(_purchasedTimers.get(itemId));
+    _purchasedTimers.delete(itemId);
+    item.status = 'needed';
+    renderList();
+    await db.from('compra_list').update({ status: 'needed', updated_at: new Date().toISOString() }).eq('id', itemId);
+  }
+}
+
+async function removeFromList(itemId) {
+  await db.from('compra_list').delete().eq('id', itemId);
+}
+
+async function clearPurchased() {
+  const ids = S.listItems.filter(i => i.status === 'purchased').map(i => i.id);
+  if (!ids.length) return;
+  await db.from('compra_list').delete().in('id', ids);
+  showToast('Comprados borrados de la lista');
+}
+
+async function addCustomFromSearch() {
+  const name = S.search.trim();
+  if (!name) return;
+
+  const { data: prod, error } = await db.from('compra_products')
+    .insert({ name, emoji: guessEmoji(name), is_custom: true })
+    .select('id')
+    .single();
+  if (error) { showToast('Error al crear producto'); return; }
+
+  const { data } = await db.from('compra_products')
+    .select('*, compra_categories(color)')
+    .order('use_count', { ascending: false }).order('name');
+  S.products = data || [];
+
+  await addToList(prod.id);
+  clearSearch();
+  showToast(`"${name}" añadido a la lista`);
+}
+
+function clearSearch() {
+  const el = document.getElementById('searchInput');
+  el.value = '';
+  S.search = '';
+  document.getElementById('searchClear').style.display = 'none';
+  renderCatalog();
+  el.focus();
+}
+
+/* ── RENDER ── */
+function render() {
+  renderList();
+  renderPills();
+  renderCatalog();
+}
+
+function renderList() {
+  const grid    = document.getElementById('listGrid');
+  const badge   = document.getElementById('listBadge');
+  const clearBtn = document.getElementById('clearBtn');
+
+  const needed    = S.listItems.filter(i => i.status === 'needed');
+  const purchased = S.listItems.filter(i => i.status === 'purchased');
+  const all       = [...needed, ...purchased];
+
+  badge.hidden    = needed.length === 0;
+  badge.textContent = needed.length;
+  clearBtn.hidden = purchased.length === 0;
+
+  if (!all.length) {
+    grid.innerHTML = '<div class="empty">Tu lista está vacía — añade productos abajo</div>';
+    return;
+  }
+
+  grid.innerHTML = all.map(item => {
+    const p   = item.compra_products;
+    const nm  = p?.name  || item.custom_name  || '?';
+    const em  = p?.emoji || item.custom_emoji || '🛒';
+    const bought = item.status === 'purchased';
+    const cls = bought ? 'card-purchased' : 'card-needed';
+    return `<div class="card ${cls}"
+      onclick="togglePurchased('${item.id}')"
+      oncontextmenu="ctxCard(event,'${item.id}')"
+      title="Mantén pulsado para eliminar">
+      ${bought ? '<div class="check-badge">✓</div>' : ''}
+      <span class="card-emoji">${em}</span>
+      <span class="card-name">${esc(nm)}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderPills() {
+  const row = document.getElementById('pillsRow');
+  // Only rebuild on first load or category change
+  if (row.children.length - 1 === S.categories.length) return;
+  row.innerHTML = `<button class="pill ${S.activeCat==='all'?'active':''}" data-cat="all" onclick="filterCat('all')">Todo</button>` +
+    S.categories.map(c =>
+      `<button class="pill ${S.activeCat===c.id?'active':''}" data-cat="${c.id}" onclick="filterCat('${c.id}')">
+        ${c.emoji} ${esc(c.name)}
+      </button>`
+    ).join('');
+}
+
+function renderCatalog() {
+  const grid      = document.getElementById('catalogGrid');
+  const inListIds = new Set(S.listItems.map(i => i.product_id));
+
+  let prods = S.products.filter(p => !inListIds.has(p.id));
+  if (S.activeCat !== 'all') prods = prods.filter(p => p.category_id === S.activeCat);
+  if (S.search) prods = prods.filter(p => p.name.toLowerCase().includes(S.search));
+
+  // En vista "Todo" sin búsqueda: solo top 12 por popularidad (sugerencias)
+  const isFiltered = S.activeCat !== 'all' || S.search;
+  const labelEl = document.getElementById('catalogLabel');
+  if (!isFiltered) {
+    prods = [...prods].sort((a, b) => (b.use_count || 0) - (a.use_count || 0)).slice(0, 12);
+    if (labelEl) labelEl.textContent = 'Utilizados frecuentemente';
+  } else if (S.search) {
+    if (labelEl) labelEl.textContent = 'Resultados';
+  } else {
+    const cat = S.categories.find(c => c.id === S.activeCat);
+    if (labelEl) labelEl.textContent = cat ? `${cat.emoji} ${cat.name}` : 'Añadir a la lista';
+  }
+
+  if (!prods.length) {
+    if (S.search) {
+      grid.innerHTML = `<div class="card card-add-custom" onclick="addCustomFromSearch()">
+        <span class="card-emoji" style="filter:none;font-size:1.6rem">➕</span>
+        <span class="card-name">Añadir<br>"${esc(S.search)}"</span>
+      </div>`;
+    } else {
+      grid.innerHTML = '<div class="empty">Todo está en la lista</div>';
+    }
+    return;
+  }
+
+  // Si hay resultados pero no coincidencia exacta, añadir tarjeta de custom al final
+  if (S.search && !prods.find(p => p.name.toLowerCase() === S.search)) {
+    prods = [...prods, { _isCustom: true }];
+  }
+
+  grid.innerHTML = prods.map(p => {
+    if (p._isCustom) {
+      return `<div class="card card-add-custom" onclick="addCustomFromSearch()">
+        <span class="card-emoji" style="filter:none;font-size:1.6rem">➕</span>
+        <span class="card-name">Añadir<br>"${esc(S.search)}"</span>
+      </div>`;
+    }
+    const color = p.compra_categories?.color || '#2FBFAA';
+    return `<div class="card card-cat"
+      style="background:${color}"
+      onclick="addToList('${p.id}')">
+      <span class="card-emoji">${p.emoji}</span>
+      <span class="card-name">${esc(p.name)}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── UI HELPERS ── */
+function filterCat(catId) {
+  S.activeCat = catId;
+  document.querySelectorAll('.pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.cat === catId)
+  );
+  renderCatalog();
+}
+
+// Long-press / right-click to remove
+let _pressTimer;
+document.addEventListener('touchstart', e => {
+  const card = e.target.closest('.card-needed, .card-purchased');
+  if (!card) return;
+  const id = extractId(card);
+  if (!id) return;
+  _pressTimer = setTimeout(() => confirmRemove(id), 600);
+}, { passive: true });
+document.addEventListener('touchend',   () => clearTimeout(_pressTimer));
+document.addEventListener('touchmove',  () => clearTimeout(_pressTimer));
+
+function ctxCard(e, id) {
+  e.preventDefault();
+  confirmRemove(id);
+}
+
+function confirmRemove(id) {
+  if (confirm('¿Eliminar de la lista?')) removeFromList(id);
+}
+
+function extractId(card) {
+  const m = card.getAttribute('onclick')?.match(/'([^']+)'/);
+  return m?.[1];
+}
+
+let _toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+init();
+</script>
+</body>
+</html>
