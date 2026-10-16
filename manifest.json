@@ -8,9 +8,9 @@
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "il_794xN.8385283639_pez1.webp",
-      "sizes": "794x794",
-      "type": "image/webp",
+      "src": "olaf.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
