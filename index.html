@@ -60,13 +60,11 @@ header {
 .h-row { display: flex; align-items: center; justify-content: space-between; }
 .h-left { display: flex; align-items: center; gap: 11px; }
 .h-icon {
-  width: 44px; height: 44px; background: #bfdbfe;
+  width: 44px; height: 44px; background: transparent;
   border-radius: var(--rs); display: grid; place-items: center;
   flex-shrink: 0; overflow: hidden;
 }
-@media (prefers-color-scheme: dark) {
-  .h-icon { background: #1e3a5f; }
-}
+.h-icon img { width: 44px; height: 44px; object-fit: contain; }
 h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
 .h-sub { margin-top: 2px; font-size: 0.75rem; color: var(--fg2); font-weight: 500; }
 .conn-dot {
@@ -292,43 +290,7 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
   <div class="h-row">
     <div class="h-left">
       <div class="h-icon">
-        <svg viewBox="0 0 44 52" xmlns="http://www.w3.org/2000/svg" width="44" height="44" style="margin-top:6px">
-          <!-- Twig hair -->
-          <line x1="19" y1="4" x2="15" y2="0" stroke="#8B5E3C" stroke-width="1.6" stroke-linecap="round"/>
-          <line x1="22" y1="3" x2="22" y2="0" stroke="#8B5E3C" stroke-width="1.6" stroke-linecap="round"/>
-          <line x1="25" y1="4" x2="29" y2="0.5" stroke="#8B5E3C" stroke-width="1.6" stroke-linecap="round"/>
-          <!-- Head -->
-          <circle cx="22" cy="17" r="14" fill="white"/>
-          <!-- Eyes -->
-          <ellipse cx="16" cy="13" rx="2.6" ry="3.2" fill="#1e1b2e"/>
-          <ellipse cx="28" cy="13" rx="2.6" ry="3.2" fill="#1e1b2e"/>
-          <circle cx="17.1" cy="11.4" r="1.1" fill="white"/>
-          <circle cx="29.1" cy="11.4" r="1.1" fill="white"/>
-          <!-- Eyebrows -->
-          <path d="M 13 10.5 Q 16 8.8 19 10.5" stroke="#8B5E3C" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-          <path d="M 25 10.5 Q 28 8.8 31 10.5" stroke="#8B5E3C" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-          <!-- Nose (carrot pointing right) -->
-          <polygon points="23,16.5 33,15.8 32,18.2" fill="#f97316"/>
-          <polygon points="31,16 33,15.8 32,18.2" fill="#ea6a0a"/>
-          <!-- Smile -->
-          <path d="M 12.5 22 Q 16 27.5 22 26 Q 28 27.5 31.5 22" stroke="#1e1b2e" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-          <!-- Teeth -->
-          <rect x="18" y="23.2" width="2.6" height="3" rx="0.5" fill="white"/>
-          <rect x="21" y="23.2" width="2.6" height="3.7" rx="0.5" fill="white"/>
-          <!-- Body (upper) -->
-          <circle cx="22" cy="41" r="11" fill="white"/>
-          <!-- Coal buttons -->
-          <circle cx="22" cy="36" r="1.4" fill="#1e1b2e"/>
-          <circle cx="22" cy="40" r="1.4" fill="#1e1b2e"/>
-          <circle cx="22" cy="44" r="1.4" fill="#1e1b2e"/>
-          <!-- Stick arms -->
-          <line x1="11" y1="39" x2="4" y2="34" stroke="#8B5E3C" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="4" y1="34" x2="1.5" y2="31" stroke="#8B5E3C" stroke-width="1.2" stroke-linecap="round"/>
-          <line x1="4" y1="34" x2="2" y2="36.5" stroke="#8B5E3C" stroke-width="1.2" stroke-linecap="round"/>
-          <line x1="33" y1="39" x2="40" y2="34" stroke="#8B5E3C" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="40" y1="34" x2="42.5" y2="31" stroke="#8B5E3C" stroke-width="1.2" stroke-linecap="round"/>
-          <line x1="40" y1="34" x2="42" y2="36.5" stroke="#8B5E3C" stroke-width="1.2" stroke-linecap="round"/>
-        </svg>
+        <img src="il_794xN.8385283639_pez1.webp" alt="Olaf">
       </div>
       <div>
         <h1>Olaf</h1>
