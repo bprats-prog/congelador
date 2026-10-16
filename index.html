@@ -152,7 +152,8 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
   letter-spacing: 0.02em;
 }
 
-.qty { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.card-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.qty { display: flex; align-items: center; gap: 4px; }
 .qbtn {
   width: 30px; height: 30px; border-radius: 50%;
   border: 1.5px solid var(--border); background: var(--bg2); color: var(--fg);
@@ -160,7 +161,7 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
   display: grid; place-items: center; font-family: var(--font);
 }
 .qbtn:active { opacity: 0.7; }
-.qbtn.minus { color: #ef4444; border-color: #ef4444; }
+.card.low .qbtn.minus { color: #ef4444; border-color: #ef4444; }
 .qnum {
   font-size: 0.88rem; font-weight: 700; font-variant-numeric: tabular-nums;
   min-width: 36px; text-align: center; transition: color 0.2s; white-space: nowrap;
@@ -480,7 +481,9 @@ function render() {
   wrap.innerHTML = '<div id="list">' + vis.map(it => {
     const cats   = getCats(it);
     const unit   = it.unit || 'uds';
-    const isLow  = Number(it.quantity) <= 1;
+    const isLow  = ['uds','bolsas'].includes(unit)
+      ? Number(it.quantity) <= 1
+      : Number(it.quantity) < 1;
     const age    = it.frozen_at ? ageInfo(it.frozen_at) : null;
 
     const dots = cats.map(id =>
@@ -507,13 +510,15 @@ function render() {
         drawerHtml +
         frozenHtml +
       '</div>' +
-      '<div class="qty">' +
-        '<button class="qbtn minus" data-id="' + it.id + '" data-d="-1">−</button>' +
-        '<span class="qnum">' + esc(String(formatQty(it.quantity, unit))) + '</span>' +
-        '<button class="qbtn" data-id="' + it.id + '" data-d="1">+</button>' +
+      '<div class="card-right">' +
+        '<div class="qty">' +
+          '<button class="qbtn minus" data-id="' + it.id + '" data-d="-1">−</button>' +
+          '<span class="qnum">' + esc(String(formatQty(it.quantity, unit))) + '</span>' +
+          '<button class="qbtn" data-id="' + it.id + '" data-d="1">+</button>' +
+        '</div>' +
+        '<button class="card-cart" data-cart="' + it.id + '" title="Añadir a la compra">🛒</button>' +
+        '<button class="card-edit" data-edit="' + it.id + '" title="Editar">✏</button>' +
       '</div>' +
-      '<button class="card-cart" data-cart="' + it.id + '" title="Añadir a la compra">🛒</button>' +
-      '<button class="card-edit" data-edit="' + it.id + '" title="Editar">✏</button>' +
     '</div>';
   }).join('') + '</div>';
 
