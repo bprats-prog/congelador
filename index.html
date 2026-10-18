@@ -64,6 +64,7 @@ header {
 }
 .h-row { display: flex; align-items: center; justify-content: space-between; }
 .h-left { display: flex; align-items: center; gap: 11px; }
+.h-right { display: flex; align-items: center; gap: 10px; }
 .h-icon {
   width: 44px; height: 44px; background: transparent;
   border-radius: var(--rs); display: grid; place-items: center;
@@ -79,10 +80,22 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
 .conn-dot.ok  { background: #22c55e; }
 .conn-dot.err { background: #ef4444; }
 
-/* SEARCH */
-.search-wrap {
-  position: relative; width: 100%;
+/* VIEW TOGGLE */
+.vtog-wrap {
+  background: var(--bg2); border-radius: 999px; padding: 3px;
+  display: flex; gap: 2px;
 }
+.vtog-btn {
+  padding: 5px 13px; border-radius: 999px; border: none;
+  font-family: var(--font); font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; background: transparent; color: var(--fg2);
+  transition: background 0.15s, color 0.15s;
+  -webkit-appearance: none; appearance: none;
+}
+.vtog-btn.active { background: var(--surface); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+/* SEARCH */
+.search-wrap { position: relative; width: 100%; }
 .search-wrap input {
   width: 100%; padding: 9px 36px 9px 36px;
   border: 1.5px solid var(--border); border-radius: var(--rs);
@@ -121,40 +134,38 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
 .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 /* LIST */
-#list { display: flex; flex-direction: column; gap: 9px; padding-block: 2px 110px; }
+#list { display: flex; flex-direction: column; gap: 8px; padding-block: 2px 110px; }
 
 /* CARD */
 .card {
   background: var(--surface); border-radius: var(--r);
   border: 1px solid var(--border); box-shadow: var(--shadow);
-  padding: 13px 15px; display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px;
   border-left-width: 3px; border-left-color: transparent;
   transition: border-left-color 0.3s;
 }
 .card.low { border-left-color: #ef4444; }
 
-.dots { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
-.dot  { width: 9px; height: 9px; border-radius: 50%; }
-
 .card-body { flex: 1; min-width: 0; }
 .card-name {
-  font-size: 0.94rem; font-weight: 600;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 0.94rem; font-weight: 600; line-height: 1.25;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-.card-cats {
-  display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px;
-}
+.card-cats { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
 .cat-tag {
   font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em;
   padding: 2px 7px; border-radius: 999px; line-height: 1.5; white-space: nowrap;
 }
-.frozen-tag {
-  display: inline-flex; align-items: center; gap: 3px;
-  font-size: 0.68rem; font-weight: 600; margin-top: 3px;
-  letter-spacing: 0.02em;
+.card-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 3px;
+  margin-top: 5px; font-size: 0.68rem; color: var(--fg2); font-weight: 600; line-height: 1.4;
+}
+.card-meta .sep { opacity: 0.4; }
+.card-meta .low-badge {
+  color: #ef4444; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
 }
 
-.card-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; margin-top: 1px; }
 .qty { display: flex; align-items: center; gap: 4px; }
 .qbtn {
   width: 30px; height: 30px; border-radius: 50%;
@@ -170,7 +181,7 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
   min-width: 36px; text-align: center; transition: color 0.2s; white-space: nowrap;
 }
 .card.low .qnum { color: #ef4444; }
-
+.card-actions { display: flex; align-items: center; }
 .card-edit, .card-cart {
   width: 30px; height: 30px; border: none; background: transparent; color: var(--fg2);
   font-size: 1.1rem; cursor: pointer; display: flex; align-items: center;
@@ -178,6 +189,21 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
   -webkit-appearance: none; appearance: none; border-radius: 0;
 }
 .card-edit:active, .card-cart:active { opacity: 0.5; }
+
+/* DRAWER VIEW */
+.drw-list { display: flex; flex-direction: column; gap: 6px; padding-block: 2px 110px; }
+.drw-section { border-radius: var(--r); background: var(--surface); border: 1px solid var(--border); overflow: hidden; }
+.drw-hdr {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px; cursor: pointer; user-select: none; font-weight: 700; font-size: 0.9rem;
+}
+.drw-count { font-weight: 500; font-size: 0.78rem; color: var(--fg2); flex: 1; }
+.drw-chevron { color: var(--fg2); transition: transform 0.2s; font-size: 0.7rem; }
+.drw-hdr.open .drw-chevron { transform: rotate(180deg); }
+.drw-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+.drw-body.open { max-height: 3000px; }
+.drw-items { display: flex; flex-direction: column; gap: 1px; padding: 0 8px 8px; }
+.drw-items .card { border-radius: 10px; }
 
 /* STATE */
 .msg { text-align: center; padding: 56px 16px; color: var(--fg2); }
@@ -201,24 +227,60 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
 }
 .sheet {
   background: var(--surface); border-radius: var(--r) var(--r) 0 0;
-  padding: 24px 20px;
-  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  padding: 0 20px;
+  padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
   width: 100%; max-width: 560px; margin: 0 auto;
-  max-height: 90vh; overflow-y: auto;
+  max-height: 92vh; overflow-y: auto;
 }
-.sheet h2 { margin: 0 0 20px; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; }
+.sheet-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 0 14px; position: sticky; top: 0;
+  background: var(--surface); z-index: 1;
+  border-bottom: 1px solid var(--border); margin-bottom: 16px;
+}
+.sheet-hdr h2 { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; }
+.cancel-x {
+  background: var(--bg2); border: none; color: var(--fg2);
+  border-radius: 999px; width: 30px; height: 30px;
+  font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font); font-weight: 700; flex-shrink: 0;
+  -webkit-appearance: none; appearance: none;
+}
 
-.field { margin-bottom: 16px; }
+.field { margin-bottom: 14px; }
 .field label {
-  display: block; margin-bottom: 7px;
+  display: block; margin-bottom: 6px;
   font-size: 0.73rem; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.07em; color: var(--fg2);
 }
+
+/* AUTOCOMPLETE */
+.ac-wrap { position: relative; }
+.ac-wrap input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--border); border-radius: var(--rs);
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font); font-size: 1rem;
+}
+.ac-wrap input:focus { outline: none; border-color: var(--accent); }
+.ac-drop {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--rs); z-index: 200; overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-height: 200px; overflow-y: auto;
+}
+.ac-item {
+  padding: 10px 14px; cursor: pointer; font-size: 0.9rem; font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+}
+.ac-item:hover, .ac-item.focus { background: var(--bg2); }
+.ac-sub { font-size: 0.75rem; color: var(--fg2); margin-left: auto; }
+
+/* FORM FIELDS */
 .field input[type="text"],
 .field input[type="number"],
-.field input[type="date"],
 .field select {
-  width: 100%; padding: 12px 14px;
+  width: 100%; padding: 11px 14px;
   border: 1.5px solid var(--border); border-radius: var(--rs);
   background: var(--bg); color: var(--fg);
   font-family: var(--font); font-size: 1rem;
@@ -228,28 +290,65 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236688aa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
 }
-.qty-row { display: flex; gap: 8px; }
-.qty-row input { flex: 1; }
-.qty-row select { flex: 1.2; }
 .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
-.field .hint {
-  font-size: 0.72rem; color: var(--fg2); margin-top: 6px; font-style: italic;
+
+/* QTY ROW IN FORM */
+.qty-row { display: flex; gap: 8px; align-items: stretch; }
+.qty-ctrl {
+  display: flex; align-items: stretch; overflow: hidden; flex: 1;
+  border: 1.5px solid var(--border); border-radius: var(--rs);
+}
+.qbtn-f {
+  width: 38px; border: none; background: var(--bg2); color: var(--fg);
+  font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; -webkit-appearance: none; appearance: none; padding: 0;
+}
+.qbtn-f:active { opacity: 0.7; }
+.qnum-f {
+  flex: 1; text-align: center; font-size: 1rem; font-weight: 700;
+  font-variant-numeric: tabular-nums; border: none;
+  border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border);
+  background: var(--bg); color: var(--fg); font-family: var(--font);
+  padding: 11px 0; min-width: 0;
+}
+.qnum-f:focus { outline: none; }
+.qty-row select { flex: 1.1; }
+
+/* DATE ROW */
+.date-outer {
+  position: relative; display: flex; align-items: stretch; gap: 0;
+  border: 1.5px solid var(--border); border-radius: var(--rs); overflow: hidden;
+  background: var(--bg);
+}
+.date-display {
+  flex: 1; display: flex; align-items: center; gap: 8px;
+  padding: 11px 14px; font-size: 0.95rem; font-weight: 500; color: var(--fg);
+  pointer-events: none;
+}
+.date-display .di { font-size: 1rem; }
+input[type="date"]#f-date {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: calc(100% - 40px); opacity: 0; cursor: pointer;
+}
+.date-x {
+  width: 40px; flex-shrink: 0; border: none; border-left: 1.5px solid var(--border);
+  background: var(--bg2); color: var(--fg2);
+  font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  -webkit-appearance: none; appearance: none; position: relative; z-index: 1;
 }
 
-/* category grid */
-.cat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
-.copt {
-  padding: 10px 4px; border-radius: var(--rs);
+/* CATEGORY CHIPS IN FORM */
+.cat-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.cchip {
+  padding: 7px 13px; border-radius: 999px;
   border: 1.5px solid var(--border); background: var(--bg); color: var(--fg2);
-  font-family: var(--font); font-size: 0.78rem; font-weight: 600;
-  cursor: pointer; text-align: center; position: relative;
+  font-family: var(--font); font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
   transition: background 0.1s, color 0.1s, border-color 0.1s;
 }
-.copt .check { position: absolute; top: 4px; right: 5px; font-size: 0.6rem; opacity: 0; transition: opacity 0.1s; }
-.copt.sel .check { opacity: 1; }
 .cat-error { font-size: 0.72rem; color: #ef4444; margin-top: 7px; display: none; }
 
-/* drawer selector */
+/* DRAWER SELECTOR */
 .drawer-row { display: flex; gap: 8px; }
 .dopt {
   flex: 1; padding: 11px 4px; border-radius: var(--rs);
@@ -259,24 +358,18 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
   transition: background 0.1s, color 0.1s, border-color 0.1s;
 }
 .dopt.sel { border-color: #6366f1; color: #6366f1; background: #6366f11a; }
-.drawer-badge {
-  display: inline-flex; align-items: center; gap: 3px;
-  font-size: 0.68rem; font-weight: 700; color: #6366f1;
-  text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px;
-}
 
-.acts { display: flex; gap: 10px; margin-top: 22px; }
+/* ACTIONS */
+.acts { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
 .btn {
-  flex: 1; padding: 13px; border-radius: var(--rs); border: none;
+  width: 100%; padding: 14px; border-radius: var(--rs); border: none;
   font-family: var(--font); font-size: 0.95rem; font-weight: 700; cursor: pointer;
 }
 .btn-p { background: var(--accent); color: #fff; }
-.btn-g { background: var(--bg2); color: var(--fg); }
 .btn-danger {
-  width: 100%; padding: 13px; border-radius: var(--rs); border: none;
+  width: 100%; padding: 13px; border-radius: var(--rs);
   font-family: var(--font); font-size: 0.9rem; font-weight: 700; cursor: pointer;
-  background: transparent; color: #ef4444; margin-top: 10px;
-  border: 1.5px solid #ef4444;
+  background: transparent; color: #ef4444; border: 1.5px solid #ef4444;
 }
 
 /* TOAST */
@@ -306,7 +399,13 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
         <div class="h-sub" id="h-sub">Conectando…</div>
       </div>
     </div>
-    <div class="conn-dot" id="conn-dot"></div>
+    <div class="h-right">
+      <div class="vtog-wrap">
+        <button class="vtog-btn active" id="vtog-list">Lista</button>
+        <button class="vtog-btn" id="vtog-draw">Cajones</button>
+      </div>
+      <div class="conn-dot" id="conn-dot"></div>
+    </div>
   </div>
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
@@ -341,47 +440,69 @@ h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
 <!-- Add / Edit sheet -->
 <div class="overlay" id="add-ov" hidden>
   <div class="sheet">
-    <h2 id="sheet-title">Añadir al congelador</h2>
+    <div class="sheet-hdr">
+      <h2 id="sheet-title">Añadir al congelador</h2>
+      <button class="cancel-x" id="add-cancel" aria-label="Cancelar">✕</button>
+    </div>
+
     <div class="field">
       <label for="f-name">Nombre</label>
-      <input id="f-name" type="text" placeholder="Pollo, merluza, espinacas…" autocomplete="off">
+      <div class="ac-wrap">
+        <input id="f-name" type="text" placeholder="Pollo, merluza, espinacas…" autocomplete="off">
+        <div class="ac-drop" id="ac-drop" hidden></div>
+      </div>
     </div>
+
     <div class="field">
       <label>Cantidad</label>
       <div class="qty-row">
-        <input id="f-qty" type="number" min="0.01" step="any" value="1">
+        <div class="qty-ctrl">
+          <button class="qbtn-f" id="f-minus" type="button">−</button>
+          <input class="qnum-f" id="f-qty" type="number" min="0.01" step="any" value="1">
+          <button class="qbtn-f" id="f-plus" type="button">+</button>
+        </div>
         <select id="f-unit">
           <option value="uds">uds</option>
           <option value="bolsas">bolsas</option>
+          <option value="raciones">raciones</option>
+          <option value="táperes">táperes</option>
           <option value="kg">kg</option>
           <option value="g">g</option>
           <option value="litros">litros</option>
         </select>
       </div>
     </div>
+
     <div class="field">
       <label>Cajón <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
       <div class="drawer-row" id="drawer-row">
-        <button class="dopt" data-drawer="1">📦 1er cajón</button>
-        <button class="dopt" data-drawer="2">📦 2º cajón</button>
-        <button class="dopt" data-drawer="3">📦 3er cajón</button>
+        <button class="dopt" data-drawer="1" type="button">Cajón 1</button>
+        <button class="dopt" data-drawer="2" type="button">Cajón 2</button>
+        <button class="dopt" data-drawer="3" type="button">Cajón 3</button>
       </div>
     </div>
+
     <div class="field">
-      <label for="f-date">Fecha de congelado</label>
-      <input id="f-date" type="date">
-      <p class="hint">Opcional — muestra la antigüedad en la tarjeta</p>
+      <label>Fecha de congelado</label>
+      <div class="date-outer">
+        <div class="date-display">
+          <span class="di">❄</span><span id="date-lbl">Hoy</span>
+        </div>
+        <input type="date" id="f-date">
+        <button class="date-x" id="date-clear" type="button" title="Quitar fecha">✕</button>
+      </div>
     </div>
+
     <div class="field">
       <label>Categorías <span style="font-weight:400;text-transform:none;letter-spacing:0">(una o más)</span></label>
-      <div class="cat-grid" id="cat-grid"></div>
+      <div class="cat-chips" id="cat-chips"></div>
       <p class="cat-error" id="cat-error">Selecciona al menos una categoría</p>
     </div>
+
     <div class="acts">
-      <button class="btn btn-g" id="add-cancel">Cancelar</button>
       <button class="btn btn-p" id="add-ok">Añadir</button>
+      <button class="btn-danger" id="delete-btn" hidden>Eliminar producto</button>
     </div>
-    <button class="btn-danger" id="delete-btn" hidden>Eliminar producto</button>
   </div>
 </div>
 
@@ -407,45 +528,16 @@ const CATS = [
 ];
 const CMAP = Object.fromEntries(CATS.map(c => [c.id, c]));
 
-const UNIT_STEP = { uds: 1, bolsas: 1, kg: 0.1, g: 50, litros: 0.25 };
-
-const DRAWERS = { '1': '1er cajón', '2': '2º cajón', '3': '3er cajón' };
+const UNIT_STEP = { uds: 1, bolsas: 1, raciones: 1, 'táperes': 1, kg: 0.1, g: 50, litros: 0.25 };
+const DRAWERS   = { '1': 'Cajón 1', '2': 'Cajón 2', '3': 'Cajón 3' };
 
 let allItems = [], activeFilter = '*', searchQ = '', editingId = null;
 let selCats = new Set(), selDrawer = null;
+let viewMode = 'list';
+let openDrawers = new Set(['1']);
+let userChangedCats = false, userChangedUnit = false;
 
-// ── edad de congelado ──────────────────────────────────────────────
-function ageInfo(frozenAt) {
-  const days = Math.floor((Date.now() - frozenAt) / 86400000);
-  let label;
-  if (days === 0)       label = 'congelado hoy';
-  else if (days === 1)  label = 'ayer';
-  else if (days < 7)   label = 'hace ' + days + ' días';
-  else if (days < 14)  label = 'hace 1 semana';
-  else if (days < 30)  label = 'hace ' + Math.floor(days / 7) + ' semanas';
-  else if (days < 60)  label = 'hace 1 mes';
-  else if (days < 365) label = 'hace ' + Math.floor(days / 30) + ' meses';
-  else                  label = 'hace +1 año';
-  const color = days < 30 ? '#16a34a' : days < 90 ? '#d97706' : '#dc2626';
-  return { label, color };
-}
-
-// ── cantidad formateada ────────────────────────────────────────────
-function formatQty(qty, unit) {
-  const n = Number(qty);
-  if (unit === 'kg' || unit === 'litros') return (Math.round(n * 10) / 10) + ' ' + unit;
-  if (unit === 'g')      return Math.round(n) + ' g';
-  if (unit === 'bolsas') return Math.round(n) + (Math.round(n) === 1 ? ' bolsa' : ' bolsas');
-  return Math.round(n);
-}
-
-// ── utils ──────────────────────────────────────────────────────────
-let tt;
-function toast(m) {
-  const el = document.getElementById('toast');
-  el.textContent = m; el.classList.add('on');
-  clearTimeout(tt); tt = setTimeout(() => el.classList.remove('on'), 2300);
-}
+// ── helpers ────────────────────────────────────────────────────────
 function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 }
@@ -455,17 +547,114 @@ function getCats(item) {
 function todayISO() {
   return new Date().toISOString().split('T')[0];
 }
+let tt;
+function toast(m) {
+  const el = document.getElementById('toast');
+  el.textContent = m; el.classList.add('on');
+  clearTimeout(tt); tt = setTimeout(() => el.classList.remove('on'), 2300);
+}
+
+// ── edad de congelado (compacto para tarjeta) ──────────────────────
+function ageInfo(frozenAt) {
+  const days = Math.floor((Date.now() - frozenAt) / 86400000);
+  let label;
+  if (days === 0)       label = 'hoy';
+  else if (days === 1)  label = 'ayer';
+  else if (days < 7)   label = 'hace ' + days + 'd';
+  else if (days < 14)  label = '1 sem';
+  else if (days < 30)  label = Math.floor(days / 7) + ' sem';
+  else if (days < 60)  label = '1 mes';
+  else if (days < 365) label = Math.floor(days / 30) + ' m';
+  else                  label = '+1 año';
+  const color = days < 30 ? '#16a34a' : days < 90 ? '#d97706' : '#dc2626';
+  return { label, color };
+}
+
+// ── fecha legible para el formulario ──────────────────────────────
+function dateLabel(iso) {
+  if (!iso) return 'Sin fecha';
+  if (iso === todayISO()) return 'Hoy';
+  const d = new Date(iso + 'T12:00:00');
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// ── cantidad formateada ────────────────────────────────────────────
+function formatQty(qty, unit) {
+  const n = Number(qty);
+  if (unit === 'kg' || unit === 'litros') return (Math.round(n * 10) / 10) + ' ' + unit;
+  if (unit === 'g')        return Math.round(n) + ' g';
+  if (unit === 'bolsas')   return Math.round(n) + (Math.round(n) === 1 ? ' bolsa'  : ' bolsas');
+  if (unit === 'raciones') return Math.round(n) + (Math.round(n) === 1 ? ' ración' : ' raciones');
+  if (unit === 'táperes')  return Math.round(n) + (Math.round(n) === 1 ? ' táper'  : ' táperes');
+  return Math.round(n);
+}
+
+// ── card HTML ──────────────────────────────────────────────────────
+function cardHTML(it) {
+  const cats  = getCats(it);
+  const unit  = it.unit || 'uds';
+  const isLow = ['uds','bolsas','raciones','táperes'].includes(unit)
+    ? Number(it.quantity) <= 1
+    : Number(it.quantity) < 1;
+  const age   = it.frozen_at ? ageInfo(it.frozen_at) : null;
+
+  const catTags = cats.map(id => {
+    const c = CMAP[id]; if (!c) return '';
+    return '<span class="cat-tag" style="color:' + c.c + ';background:' + c.c + '22">' + c.e + ' ' + esc(c.id) + '</span>';
+  }).join('');
+
+  const metaParts = [];
+  if (it.drawer) metaParts.push('📦 ' + esc(DRAWERS[it.drawer] || it.drawer));
+  if (age)       metaParts.push('<span style="color:' + age.color + '">❄ ' + esc(age.label) + '</span>');
+  if (isLow)     metaParts.push('<span class="low-badge">¡Último!</span>');
+  const metaHtml = metaParts.length
+    ? '<div class="card-meta">' + metaParts.join('<span class="sep"> · </span>') + '</div>'
+    : '';
+
+  return '<div class="card' + (isLow ? ' low' : '') + '">' +
+    '<div class="card-body">' +
+      '<div class="card-name">' + esc(it.name) + '</div>' +
+      '<div class="card-cats">' + catTags + '</div>' +
+      metaHtml +
+    '</div>' +
+    '<div class="card-right">' +
+      '<div class="qty">' +
+        '<button class="qbtn minus" data-id="' + it.id + '" data-d="-1">−</button>' +
+        '<span class="qnum">' + esc(String(formatQty(it.quantity, unit))) + '</span>' +
+        '<button class="qbtn" data-id="' + it.id + '" data-d="1">+</button>' +
+      '</div>' +
+      '<div class="card-actions">' +
+        '<button class="card-cart" data-cart="' + it.id + '" title="Añadir a la compra">🛒</button>' +
+        '<button class="card-edit" data-edit="' + it.id + '" title="Editar">✏</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function bindCards(wrap) {
+  wrap.querySelectorAll('[data-d]').forEach(b =>
+    b.addEventListener('click', () => chQty(b.dataset.id, +b.dataset.d))
+  );
+  wrap.querySelectorAll('[data-cart]').forEach(b =>
+    b.addEventListener('click', () => addToCompra(b.dataset.cart))
+  );
+  wrap.querySelectorAll('[data-edit]').forEach(b =>
+    b.addEventListener('click', () => openEdit(b.dataset.edit))
+  );
+}
 
 // ── render ─────────────────────────────────────────────────────────
 function render() {
-  let vis = allItems;
-  if (activeFilter !== '*') vis = vis.filter(i => getCats(i).includes(activeFilter));
-  if (searchQ) vis = vis.filter(i => i.name.toLowerCase().includes(searchQ));
-
   const n = allItems.length;
   document.getElementById('h-sub').textContent =
     n === 0 ? 'Vacío' : n === 1 ? '1 producto' : n + ' productos';
+  if (viewMode === 'list') renderList(); else renderDrawers();
+}
 
+function renderList() {
+  let vis = allItems;
+  if (activeFilter !== '*') vis = vis.filter(i => getCats(i).includes(activeFilter));
+  if (searchQ) vis = vis.filter(i => i.name.toLowerCase().includes(searchQ));
   const wrap = document.getElementById('list-wrap');
   if (vis.length === 0) {
     const cat = CMAP[activeFilter];
@@ -479,63 +668,58 @@ function render() {
       '</span><p>' + empty + '</p></div>';
     return;
   }
+  wrap.innerHTML = '<div id="list">' + vis.map(cardHTML).join('') + '</div>';
+  bindCards(wrap);
+}
 
-  wrap.innerHTML = '<div id="list">' + vis.map(it => {
-    const cats   = getCats(it);
-    const unit   = it.unit || 'uds';
-    const isLow  = ['uds','bolsas'].includes(unit)
-      ? Number(it.quantity) <= 1
-      : Number(it.quantity) < 1;
-    const age    = it.frozen_at ? ageInfo(it.frozen_at) : null;
+function renderDrawers() {
+  const wrap = document.getElementById('list-wrap');
+  let vis = allItems;
+  if (searchQ) vis = vis.filter(i => i.name.toLowerCase().includes(searchQ));
 
-    const dots = cats.map(id =>
-      '<div class="dot" style="background:' + (CMAP[id]?.c || '#6b7280') + '"></div>'
-    ).join('');
+  const sections = [
+    { key: '1', label: 'Cajón 1', emoji: '❄' },
+    { key: '2', label: 'Cajón 2', emoji: '❄' },
+    { key: '3', label: 'Cajón 3', emoji: '❄' },
+    { key: null, label: 'Sin cajón asignado', emoji: '📦' },
+  ];
 
-    const frozenHtml = age
-      ? '<div class="frozen-tag" style="color:' + age.color + '">❄ ' + esc(age.label) + '</div>'
-      : '';
-
-    const drawerHtml = it.drawer
-      ? '<div class="drawer-badge">📦 ' + esc(DRAWERS[it.drawer] || it.drawer) + '</div>'
-      : '';
-
-    const lowBadge = isLow
-      ? ' <span style="color:#ef4444;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em">· ¡Último!</span>'
-      : '';
-
-    return '<div class="card' + (isLow ? ' low' : '') + '">' +
-      '<div class="dots">' + dots + '</div>' +
-      '<div class="card-body">' +
-        '<div class="card-name">' + esc(it.name) + lowBadge + '</div>' +
-        '<div class="card-cats">' + cats.map(id => {
-          const c = CMAP[id]; if (!c) return '';
-          return '<span class="cat-tag" style="color:' + c.c + ';background:' + c.c + '22">' + c.e + ' ' + esc(c.id) + '</span>';
-        }).join('') + '</div>' +
-        drawerHtml +
-        frozenHtml +
+  let html = '<div class="drw-list">';
+  let anySection = false;
+  sections.forEach(sec => {
+    const items = vis.filter(i => sec.key === null ? !i.drawer : i.drawer === sec.key);
+    if (!items.length) return;
+    anySection = true;
+    const dk = sec.key || 'none';
+    const isOpen = openDrawers.has(dk);
+    html += '<div class="drw-section" data-drw="' + dk + '">' +
+      '<div class="drw-hdr' + (isOpen ? ' open' : '') + '">' +
+        sec.emoji + ' ' + esc(sec.label) +
+        '<span class="drw-count">' + items.length + ' producto' + (items.length !== 1 ? 's' : '') + '</span>' +
+        '<span class="drw-chevron">▼</span>' +
       '</div>' +
-      '<div class="card-right">' +
-        '<div class="qty">' +
-          '<button class="qbtn minus" data-id="' + it.id + '" data-d="-1">−</button>' +
-          '<span class="qnum">' + esc(String(formatQty(it.quantity, unit))) + '</span>' +
-          '<button class="qbtn" data-id="' + it.id + '" data-d="1">+</button>' +
-        '</div>' +
-        '<button class="card-cart" data-cart="' + it.id + '" title="Añadir a la compra">🛒</button>' +
-        '<button class="card-edit" data-edit="' + it.id + '" title="Editar">✏</button>' +
+      '<div class="drw-body' + (isOpen ? ' open' : '') + '">' +
+        '<div class="drw-items">' + items.map(cardHTML).join('') + '</div>' +
       '</div>' +
     '</div>';
-  }).join('') + '</div>';
+  });
+  if (!anySection) {
+    html += '<div class="msg"><span class="mi">🔍</span><p>Sin resultados.</p></div>';
+  }
+  html += '</div>';
+  wrap.innerHTML = html;
 
-  wrap.querySelectorAll('[data-d]').forEach(b => {
-    b.addEventListener('click', () => chQty(b.dataset.id, +b.dataset.d));
+  wrap.querySelectorAll('.drw-hdr').forEach(hdr => {
+    hdr.addEventListener('click', () => {
+      const sec  = hdr.closest('[data-drw]');
+      const dk   = sec.dataset.drw;
+      const body = sec.querySelector('.drw-body');
+      const open = body.classList.toggle('open');
+      hdr.classList.toggle('open', open);
+      if (open) openDrawers.add(dk); else openDrawers.delete(dk);
+    });
   });
-  wrap.querySelectorAll('[data-cart]').forEach(b => {
-    b.addEventListener('click', () => addToCompra(b.dataset.cart));
-  });
-  wrap.querySelectorAll('[data-edit]').forEach(b => {
-    b.addEventListener('click', () => openEdit(b.dataset.edit));
-  });
+  bindCards(wrap);
 }
 
 // ── data ───────────────────────────────────────────────────────────
@@ -548,29 +732,21 @@ async function loadItems() {
 async function addToCompra(id) {
   const it = allItems.find(i => i.id === id);
   if (!it) return;
-
-  // Buscar coincidencia en el catálogo de compra
   const { data: product } = await db
-    .from('compra_products').select('id, emoji')
-    .ilike('name', it.name).maybeSingle();
-
-  // Comprobar duplicado (por product_id o por custom_name según si hay match)
+    .from('compra_products').select('id, emoji').ilike('name', it.name).maybeSingle();
   const dupQ = db.from('compra_list').select('id').eq('status', 'needed');
   const { data: existing } = await (product
     ? dupQ.eq('product_id', product.id)
     : dupQ.eq('custom_name', it.name)).maybeSingle();
   if (existing) { toast('"' + esc(it.name) + '" ya está en la lista de la compra'); return; }
-
-  // Insertar con product_id si hay match, si no con nombre+emoji de categoría
   const row = { status: 'needed' };
   if (product) {
     row.product_id = product.id;
   } else {
     const cats = getCats(it);
-    row.custom_name = it.name;
+    row.custom_name  = it.name;
     row.custom_emoji = cats.length ? (CMAP[cats[0]]?.e || '❄') : '❄';
   }
-
   const { error } = await db.from('compra_list').insert(row);
   if (!error) toast('🛒 "' + esc(it.name) + '" añadido a la lista de la compra');
 }
@@ -579,7 +755,7 @@ async function chQty(id, direction) {
   const it = allItems.find(i => i.id === id);
   if (!it) return;
   const step = UNIT_STEP[it.unit || 'uds'] || 1;
-  const nq = Math.round((Number(it.quantity) + direction * step) * 1000) / 1000;
+  const nq   = Math.round((Number(it.quantity) + direction * step) * 1000) / 1000;
   if (nq <= 0) {
     await db.from(TABLE).delete().eq('id', id);
     toast('"' + it.name + '" eliminado');
@@ -601,7 +777,7 @@ document.getElementById('search-clear').addEventListener('click', () => {
   render();
 });
 
-// ── filters ────────────────────────────────────────────────────────
+// ── filter bar ─────────────────────────────────────────────────────
 document.getElementById('fbar').addEventListener('click', e => {
   const chip = e.target.closest('[data-cat]');
   if (!chip) return;
@@ -610,56 +786,157 @@ document.getElementById('fbar').addEventListener('click', e => {
   render();
 });
 
-// ── category multi-select ──────────────────────────────────────────
-function buildCats() {
-  document.getElementById('cat-grid').innerHTML = CATS.map(c =>
-    '<button class="copt" data-cat="' + c.id + '">' +
-      c.e + ' ' + c.id + '<span class="check">✓</span>' +
-    '</button>'
+// ── view toggle ────────────────────────────────────────────────────
+document.getElementById('vtog-list').addEventListener('click', () => {
+  if (viewMode === 'list') return;
+  viewMode = 'list';
+  document.getElementById('vtog-list').classList.add('active');
+  document.getElementById('vtog-draw').classList.remove('active');
+  document.getElementById('fbar').style.display = '';
+  render();
+});
+document.getElementById('vtog-draw').addEventListener('click', () => {
+  if (viewMode === 'draw') return;
+  viewMode = 'draw';
+  document.getElementById('vtog-draw').classList.add('active');
+  document.getElementById('vtog-list').classList.remove('active');
+  document.getElementById('fbar').style.display = 'none';
+  render();
+});
+
+// ── category chips in form ─────────────────────────────────────────
+function buildCatChips() {
+  document.getElementById('cat-chips').innerHTML = CATS.map(c =>
+    '<button class="cchip" data-cat="' + c.id + '" type="button">' + c.e + ' ' + c.id + '</button>'
   ).join('');
-  refreshCatStyles();
-  document.getElementById('cat-grid').addEventListener('click', e => {
+  refreshCchipStyles();
+  document.getElementById('cat-chips').addEventListener('click', e => {
     const b = e.target.closest('[data-cat]');
     if (!b) return;
     const id = b.dataset.cat;
     if (selCats.has(id)) selCats.delete(id); else selCats.add(id);
-    refreshCatStyles();
+    userChangedCats = true;
+    refreshCchipStyles();
     document.getElementById('cat-error').style.display = 'none';
   });
 }
 
-function refreshCatStyles() {
-  document.querySelectorAll('.copt').forEach(b => {
+function refreshCchipStyles() {
+  document.querySelectorAll('.cchip').forEach(b => {
     const active = selCats.has(b.dataset.cat);
-    const col = CMAP[b.dataset.cat]?.c || '#6b7280';
-    b.classList.toggle('sel', active);
-    b.style.borderColor = active ? col : '';
-    b.style.color       = active ? col : '';
+    const col    = CMAP[b.dataset.cat]?.c || '#6b7280';
+    b.style.borderColor = active ? col    : '';
+    b.style.color       = active ? col    : '';
     b.style.background  = active ? col + '1a' : '';
   });
 }
 
-// ── open sheet (add / edit) ────────────────────────────────────────
+// ── drawer selector ────────────────────────────────────────────────
 function refreshDrawerStyles() {
-  document.querySelectorAll('.dopt').forEach(b => {
-    b.classList.toggle('sel', b.dataset.drawer === selDrawer);
+  document.querySelectorAll('.dopt').forEach(b =>
+    b.classList.toggle('sel', b.dataset.drawer === selDrawer)
+  );
+}
+document.getElementById('drawer-row').addEventListener('click', e => {
+  const b = e.target.closest('[data-drawer]');
+  if (!b) return;
+  selDrawer = selDrawer === b.dataset.drawer ? null : b.dataset.drawer;
+  refreshDrawerStyles();
+});
+
+// ── date display ───────────────────────────────────────────────────
+function updateDateDisplay() {
+  document.getElementById('date-lbl').textContent = dateLabel(document.getElementById('f-date').value);
+}
+document.getElementById('f-date').addEventListener('change', updateDateDisplay);
+document.getElementById('date-clear').addEventListener('click', () => {
+  document.getElementById('f-date').value = '';
+  updateDateDisplay();
+});
+
+// ── form qty +/− ──────────────────────────────────────────────────
+document.getElementById('f-minus').addEventListener('click', () => {
+  const unit = document.getElementById('f-unit').value;
+  const step = UNIT_STEP[unit] || 1;
+  const cur  = parseFloat(document.getElementById('f-qty').value) || step;
+  document.getElementById('f-qty').value = Math.max(step, Math.round((cur - step) * 1000) / 1000);
+});
+document.getElementById('f-plus').addEventListener('click', () => {
+  const unit = document.getElementById('f-unit').value;
+  const step = UNIT_STEP[unit] || 1;
+  const cur  = parseFloat(document.getElementById('f-qty').value) || 0;
+  document.getElementById('f-qty').value = Math.round((cur + step) * 1000) / 1000;
+});
+document.getElementById('f-unit').addEventListener('change', () => { userChangedUnit = true; });
+
+// ── autocomplete ───────────────────────────────────────────────────
+const fName  = document.getElementById('f-name');
+const acDrop = document.getElementById('ac-drop');
+
+function getSuggestions(q) {
+  if (!q) return [];
+  const lq = q.toLowerCase();
+  const seen = new Set();
+  return allItems
+    .filter(it => it.name.toLowerCase().includes(lq))
+    .filter(it => { if (seen.has(it.name)) return false; seen.add(it.name); return true; })
+    .slice(0, 6);
+}
+
+function showAc(q) {
+  const sugs = getSuggestions(q);
+  if (!sugs.length) { acDrop.hidden = true; return; }
+  acDrop.hidden = false;
+  acDrop.innerHTML = sugs.map(it => {
+    const unit = it.unit || 'uds';
+    const cats = getCats(it);
+    const sub  = [unit !== 'uds' ? unit : '', cats.slice(0,2).map(c => CMAP[c]?.e || '').join('')].filter(Boolean).join(' · ');
+    return '<div class="ac-item" data-name="' + esc(it.name) +
+      '" data-unit="' + esc(unit) +
+      '" data-cats="' + esc(JSON.stringify(cats)) + '">' +
+      esc(it.name) + (sub ? '<span class="ac-sub">' + esc(sub) + '</span>' : '') +
+    '</div>';
+  }).join('');
+  acDrop.querySelectorAll('.ac-item').forEach(el => {
+    el.addEventListener('mousedown', e => {
+      e.preventDefault();
+      fName.value = el.dataset.name;
+      if (!userChangedUnit) document.getElementById('f-unit').value = el.dataset.unit;
+      if (!userChangedCats) {
+        try { selCats = new Set(JSON.parse(el.dataset.cats)); refreshCchipStyles(); } catch {}
+      }
+      acDrop.hidden = true;
+    });
   });
 }
 
+fName.addEventListener('input',  e => showAc(e.target.value.trim()));
+fName.addEventListener('focus',  e => { if (e.target.value.trim()) showAc(e.target.value.trim()); });
+fName.addEventListener('blur',   () => setTimeout(() => { acDrop.hidden = true; }, 150));
+fName.addEventListener('keydown', e => {
+  if (e.key === 'Enter'  && acDrop.hidden) document.getElementById('add-ok').click();
+  if (e.key === 'Escape') acDrop.hidden = true;
+});
+
+// ── open sheet ────────────────────────────────────────────────────
 function openSheet({ name = '', qty = 1, unit = 'uds', date = todayISO(), cats = new Set(), drawer = null, id = null } = {}) {
-  editingId = id;
-  document.getElementById('f-name').value  = name;
-  document.getElementById('f-qty').value   = qty;
-  document.getElementById('f-unit').value  = unit;
-  document.getElementById('f-date').value  = date;
-  selCats = new Set(cats);
+  editingId      = id;
+  userChangedCats = false;
+  userChangedUnit = false;
+  document.getElementById('f-name').value = name;
+  document.getElementById('f-qty').value  = qty;
+  document.getElementById('f-unit').value = unit;
+  document.getElementById('f-date').value = date;
+  updateDateDisplay();
+  selCats   = new Set(cats);
   selDrawer = drawer;
-  refreshCatStyles();
+  refreshCchipStyles();
   refreshDrawerStyles();
   document.getElementById('cat-error').style.display = 'none';
-  document.getElementById('sheet-title').textContent = id ? 'Editar producto' : 'Añadir al congelador';
-  document.getElementById('add-ok').textContent      = id ? 'Guardar cambios' : 'Añadir';
-  document.getElementById('delete-btn').hidden = !id;
+  acDrop.hidden = true;
+  document.getElementById('sheet-title').textContent = id ? 'Editar producto'   : 'Añadir al congelador';
+  document.getElementById('add-ok').textContent      = id ? 'Guardar cambios'   : 'Añadir';
+  document.getElementById('delete-btn').hidden       = !id;
   document.getElementById('add-ov').hidden = false;
   setTimeout(() => document.getElementById('f-name').focus(), 60);
 }
@@ -679,21 +956,17 @@ function openEdit(id) {
 }
 
 document.getElementById('fab').addEventListener('click', () => openSheet());
-
-document.getElementById('drawer-row').addEventListener('click', e => {
-  const b = e.target.closest('[data-drawer]');
-  if (!b) return;
-  selDrawer = selDrawer === b.dataset.drawer ? null : b.dataset.drawer; // toggle off si ya estaba
-  refreshDrawerStyles();
-});
-
 document.getElementById('add-cancel').addEventListener('click', () => {
   document.getElementById('add-ov').hidden = true;
 });
+document.getElementById('add-ov').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.hidden = true;
+});
 
+// ── delete ─────────────────────────────────────────────────────────
 document.getElementById('delete-btn').addEventListener('click', async () => {
   if (!editingId) return;
-  const it = allItems.find(i => i.id === editingId);
+  const it  = allItems.find(i => i.id === editingId);
   const btn = document.getElementById('delete-btn');
   btn.disabled = true;
   const { error } = await db.from(TABLE).delete().eq('id', editingId);
@@ -703,13 +976,8 @@ document.getElementById('delete-btn').addEventListener('click', async () => {
     toast((it ? '"' + it.name + '"' : 'Producto') + ' eliminado');
   }
 });
-document.getElementById('add-ov').addEventListener('click', e => {
-  if (e.target === e.currentTarget) e.currentTarget.hidden = true;
-});
-document.getElementById('f-name').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('add-ok').click();
-});
 
+// ── save ───────────────────────────────────────────────────────────
 document.getElementById('add-ok').addEventListener('click', async () => {
   const name    = document.getElementById('f-name').value.trim();
   const qty     = parseFloat(document.getElementById('f-qty').value) || 1;
@@ -717,22 +985,18 @@ document.getElementById('add-ok').addEventListener('click', async () => {
   const dateVal = document.getElementById('f-date').value;
 
   if (!name) { document.getElementById('f-name').focus(); return; }
-  if (selCats.size === 0) {
-    document.getElementById('cat-error').style.display = 'block';
-    return;
-  }
+  if (selCats.size === 0) { document.getElementById('cat-error').style.display = 'block'; return; }
 
   const frozenAt = dateVal ? new Date(dateVal + 'T12:00:00').getTime() : null;
   const btn = document.getElementById('add-ok');
   btn.disabled = true;
-
   try {
     if (editingId) {
       const { error } = await db.from(TABLE).update({
         name, quantity: qty, unit,
         categories: Array.from(selCats),
-        frozen_at: frozenAt,
-        drawer: selDrawer,
+        frozen_at:  frozenAt,
+        drawer:     selDrawer,
       }).eq('id', editingId);
       if (!error) {
         document.getElementById('add-ov').hidden = true;
@@ -761,13 +1025,13 @@ function subscribe() {
     .subscribe(status => {
       const dot = document.getElementById('conn-dot');
       dot.className = 'conn-dot' +
-        (status === 'SUBSCRIBED'    ? ' ok'  :
-         status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' ? ' err' : '');
+        (status === 'SUBSCRIBED'                                   ? ' ok'  :
+         status === 'CHANNEL_ERROR' || status === 'TIMED_OUT'     ? ' err' : '');
     });
 }
 
 // ── init ───────────────────────────────────────────────────────────
-buildCats();
+buildCatChips();
 loadItems().then(subscribe);
 </script>
 </body>
