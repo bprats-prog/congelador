@@ -396,8 +396,15 @@ input[type="date"]#f-date {
   font-size: 0.83rem; font-weight: 700;
   opacity: 0; transition: opacity 0.18s, transform 0.18s;
   z-index: 300; pointer-events: none; white-space: nowrap;
+  display: flex; align-items: center; gap: 12px;
 }
-.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.toast-undo {
+  background: transparent; border: 1.5px solid rgba(255,255,255,0.35);
+  color: inherit; font-family: var(--font); font-size: 0.8rem; font-weight: 700;
+  border-radius: 999px; padding: 3px 10px; cursor: pointer; flex-shrink: 0;
+  -webkit-appearance: none; appearance: none;
+}
 </style>
 </head>
 <body>
@@ -520,7 +527,10 @@ input[type="date"]#f-date {
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast">
+  <span id="toast-msg"></span>
+  <button class="toast-undo" id="toast-undo" hidden>Deshacer</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
@@ -563,9 +573,55 @@ function todayISO() {
 }
 let tt;
 function toast(m) {
-  const el = document.getElementById('toast');
-  el.textContent = m; el.classList.add('on');
+  const el   = document.getElementById('toast');
+  const msg  = document.getElementById('toast-msg');
+  const undo = document.getElementById('toast-undo');
+  msg.textContent = m; undo.hidden = true;
+  el.classList.add('on');
   clearTimeout(tt); tt = setTimeout(() => el.classList.remove('on'), 2300);
+}
+
+let pendingDelete = null;
+
+function toastWithUndo(m, onUndo) {
+  const el   = document.getElementById('toast');
+  const msg  = document.getElementById('toast-msg');
+  const undo = document.getElementById('toast-undo');
+  msg.textContent = m; undo.hidden = false;
+  el.classList.add('on');
+  clearTimeout(tt); tt = setTimeout(() => el.classList.remove('on'), 5000);
+  undo.onclick = () => {
+    el.classList.remove('on');
+    clearTimeout(tt);
+    onUndo();
+  };
+}
+
+async function commitPending() {
+  if (!pendingDelete) return;
+  const { id } = pendingDelete;
+  clearTimeout(pendingDelete.timer);
+  pendingDelete = null;
+  await db.from(TABLE).delete().eq('id', id);
+}
+
+function deleteWithUndo(id) {
+  const it = allItems.find(i => i.id === id);
+  if (!it) return;
+  // commit any previous pending delete immediately
+  commitPending();
+  pendingDelete = {
+    id,
+    timer: setTimeout(() => commitPending(), 5000),
+  };
+  render();
+  toastWithUndo('"' + esc(it.name) + '" eliminado', () => {
+    if (pendingDelete?.id === id) {
+      clearTimeout(pendingDelete.timer);
+      pendingDelete = null;
+      render();
+    }
+  });
 }
 
 // ── edad de congelado (compacto para tarjeta) ──────────────────────
@@ -670,14 +726,7 @@ function bindCards(wrap) {
 
   // swipe-to-delete
   wrap.querySelectorAll('[data-del]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.dataset.del;
-      const it = allItems.find(i => i.id === id);
-      const sw = btn.closest('.swipe-wrap');
-      if (sw) { sw.style.transition = 'opacity 0.2s'; sw.style.opacity = '0'; }
-      await db.from(TABLE).delete().eq('id', id);
-      toast((it ? '"' + it.name + '"' : 'Producto') + ' eliminado');
-    });
+    btn.addEventListener('click', () => deleteWithUndo(btn.dataset.del));
   });
 
   wrap.querySelectorAll('.swipe-wrap').forEach(sw => {
@@ -728,7 +777,7 @@ function render() {
 }
 
 function renderList() {
-  let vis = allItems;
+  let vis = allItems.filter(i => i.id !== pendingDelete?.id);
   if (activeFilter !== '*') vis = vis.filter(i => getCats(i).includes(activeFilter));
   if (searchQ) vis = vis.filter(i => i.name.toLowerCase().includes(searchQ));
   const wrap = document.getElementById('list-wrap');
@@ -750,7 +799,7 @@ function renderList() {
 
 function renderDrawers() {
   const wrap = document.getElementById('list-wrap');
-  let vis = allItems;
+  let vis = allItems.filter(i => i.id !== pendingDelete?.id);
   if (searchQ) vis = vis.filter(i => i.name.toLowerCase().includes(searchQ));
 
   const sections = [
