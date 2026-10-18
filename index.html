@@ -372,6 +372,20 @@ input[type="date"]#f-date {
   background: transparent; color: #ef4444; border: 1.5px solid #ef4444;
 }
 
+/* SWIPE TO DELETE */
+.swipe-wrap { position: relative; border-radius: var(--r); overflow: hidden; }
+.drw-items .swipe-wrap { border-radius: 10px; }
+.swipe-del {
+  position: absolute; right: 0; top: 0; bottom: 0; width: 80px;
+  background: #ef4444; color: #fff; border: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-family: var(--font); font-size: 0.72rem; font-weight: 700; cursor: pointer;
+  -webkit-appearance: none; appearance: none; user-select: none;
+}
+.swipe-del .sd-icon { font-size: 1.2rem; }
+.card { transition: transform 0.22s ease; will-change: transform; }
+.card.sw-dragging { transition: none; }
+
 /* TOAST */
 .toast {
   position: fixed;
@@ -611,7 +625,9 @@ function cardHTML(it) {
     ? '<div class="card-meta">' + metaParts.join('<span class="sep"> · </span>') + '</div>'
     : '';
 
-  return '<div class="card' + (isLow ? ' low' : '') + '">' +
+  return '<div class="swipe-wrap">' +
+    '<button class="swipe-del" data-del="' + it.id + '"><span class="sd-icon">🗑</span>Borrar</button>' +
+    '<div class="card' + (isLow ? ' low' : '') + '">' +
     '<div class="card-body">' +
       '<div class="card-name">' + esc(it.name) + '</div>' +
       '<div class="card-cats">' + catTags + '</div>' +
@@ -628,7 +644,17 @@ function cardHTML(it) {
         '<button class="card-edit" data-edit="' + it.id + '" title="Editar">✏</button>' +
       '</div>' +
     '</div>' +
-  '</div>';
+  '</div>' +
+'</div>';
+}
+
+let currentSwipe = null;
+
+function closeSwipe(sw) {
+  if (!sw) return;
+  const card = sw.querySelector('.card');
+  card.style.transform = '';
+  currentSwipe = null;
 }
 
 function bindCards(wrap) {
@@ -641,6 +667,56 @@ function bindCards(wrap) {
   wrap.querySelectorAll('[data-edit]').forEach(b =>
     b.addEventListener('click', () => openEdit(b.dataset.edit))
   );
+
+  // swipe-to-delete
+  wrap.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.del;
+      const it = allItems.find(i => i.id === id);
+      const sw = btn.closest('.swipe-wrap');
+      if (sw) { sw.style.transition = 'opacity 0.2s'; sw.style.opacity = '0'; }
+      await db.from(TABLE).delete().eq('id', id);
+      toast((it ? '"' + it.name + '"' : 'Producto') + ' eliminado');
+    });
+  });
+
+  wrap.querySelectorAll('.swipe-wrap').forEach(sw => {
+    const card = sw.querySelector('.card');
+    let sx = 0, sy = 0, active = false, opened = false;
+
+    card.addEventListener('touchstart', e => {
+      if (currentSwipe && currentSwipe !== sw) closeSwipe(currentSwipe);
+      sx = e.touches[0].clientX;
+      sy = e.touches[0].clientY;
+      active = true;
+      opened = currentSwipe === sw;
+      card.classList.add('sw-dragging');
+    }, { passive: true });
+
+    card.addEventListener('touchmove', e => {
+      if (!active) return;
+      const dx = e.touches[0].clientX - sx;
+      const dy = e.touches[0].clientY - sy;
+      if (!opened && Math.abs(dy) > Math.abs(dx)) { active = false; card.classList.remove('sw-dragging'); return; }
+      const base   = opened ? -80 : 0;
+      const offset = Math.max(-80, Math.min(0, base + dx));
+      card.style.transform = 'translateX(' + offset + 'px)';
+    }, { passive: true });
+
+    card.addEventListener('touchend', e => {
+      card.classList.remove('sw-dragging');
+      if (!active) return;
+      active = false;
+      const dx = e.changedTouches[0].clientX - sx;
+      const threshold = opened ? 40 : -40;
+      if ((!opened && dx < threshold) || (opened && dx < 0)) {
+        card.style.transform = 'translateX(-80px)';
+        currentSwipe = sw;
+      } else {
+        closeSwipe(sw);
+      }
+    });
+  });
 }
 
 // ── render ─────────────────────────────────────────────────────────
