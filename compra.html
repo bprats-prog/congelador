@@ -115,6 +115,65 @@ header {
   padding: 4px;
   display: none;
 }
+.autocomplete {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--surface);
+  border-radius: 14px;
+  overflow: hidden;
+  z-index: 50;
+  box-shadow: 0 8px 28px rgba(0,0,0,.4);
+  display: none;
+}
+.autocomplete.open { display: block; }
+.ac-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background .12s;
+}
+.ac-item:last-child { border-bottom: none; }
+.ac-item:active { background: rgba(255,255,255,.07); }
+.ac-emoji { font-size: 1.4rem; line-height: 1; }
+.ac-name { font-size: 0.95rem; font-weight: 500; color: var(--fg); }
+.ac-name mark { background: none; color: var(--teal); font-weight: 700; }
+
+/* ── RECIENTES ── */
+.recent-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 2px 0 4px;
+}
+.recent-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--fg);
+  transition: background .15s, border-color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.recent-chip:active { background: rgba(47,191,170,.15); border-color: var(--teal); }
+.recent-chip-emoji { font-size: 1.1rem; }
+.recent-clear {
+  background: none;
+  border: none;
+  color: var(--fg2);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
 
 /* ── SECTION ── */
 .section { padding: 14px 14px 6px; }
@@ -382,6 +441,7 @@ header {
     <span class="search-icon">🔍</span>
     <input class="search-input" id="searchInput" type="search" placeholder="¿Qué deseas comprar?" autocomplete="off" autocorrect="off">
     <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    <div class="autocomplete" id="autocomplete"></div>
   </div>
 </div>
 
@@ -397,6 +457,15 @@ header {
   <div class="card-grid" id="listGrid">
     <div class="empty">Tu lista está vacía — añade productos abajo</div>
   </div>
+</div>
+
+<!-- Recientes (productos quitados recientemente) -->
+<div class="section" id="recentsSection" hidden>
+  <div class="section-hdr">
+    <span class="section-label">Quitados recientemente</span>
+    <button class="recent-clear" onclick="clearRecents()">Limpiar</button>
+  </div>
+  <div class="recent-grid" id="recentsGrid"></div>
 </div>
 
 <div class="divider"></div>
@@ -449,7 +518,14 @@ async function init() {
   document.getElementById('searchInput').addEventListener('input', e => {
     S.search = e.target.value.trim().toLowerCase();
     document.getElementById('searchClear').style.display = S.search ? 'flex' : 'none';
+    renderAutocomplete();
     renderCatalog();
+  });
+
+  document.addEventListener('pointerdown', e => {
+    if (!e.target.closest('#autocomplete') && !e.target.closest('#searchInput')) {
+      closeAutocomplete();
+    }
   });
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if (e.key !== 'Enter' || !S.search) return;
@@ -708,7 +784,92 @@ async function togglePurchased(itemId) {
 }
 
 async function removeFromList(itemId) {
+  // Guardar en recientes antes de borrar
+  const item = S.listItems.find(i => i.id === itemId);
+  if (item) {
+    const prod = S.products.find(p => p.id === item.product_id)
+               || { id: item.product_id, name: item.compra_products?.name || '?', emoji: item.compra_products?.emoji || '🛒' };
+    pushRecent({ id: prod.id, name: prod.name || item.compra_products?.name, emoji: prod.emoji || item.compra_products?.emoji || '🛒' });
+  }
   await db.from('compra_list').delete().eq('id', itemId);
+}
+
+/* ── AUTOCOMPLETE ── */
+function renderAutocomplete() {
+  const el = document.getElementById('autocomplete');
+  if (!S.search) { closeAutocomplete(); return; }
+  const inListIds = new Set(S.listItems.map(i => i.product_id));
+  const matches = S.products
+    .filter(p => !inListIds.has(p.id) && p.name.toLowerCase().includes(S.search))
+    .sort((a, b) => (b.use_count || 0) - (a.use_count || 0))
+    .slice(0, 6);
+  if (!matches.length) { closeAutocomplete(); return; }
+  const q = S.search;
+  el.innerHTML = matches.map(p => {
+    const idx = p.name.toLowerCase().indexOf(q);
+    const hi = idx >= 0
+      ? esc(p.name.slice(0, idx)) + '<mark>' + esc(p.name.slice(idx, idx + q.length)) + '</mark>' + esc(p.name.slice(idx + q.length))
+      : esc(p.name);
+    return `<div class="ac-item" onpointerdown="acPick('${p.id}')">
+      <span class="ac-emoji">${p.emoji}</span>
+      <span class="ac-name">${hi}</span>
+    </div>`;
+  }).join('');
+  el.classList.add('open');
+}
+
+function closeAutocomplete() {
+  const el = document.getElementById('autocomplete');
+  if (el) el.classList.remove('open');
+}
+
+async function acPick(productId) {
+  closeAutocomplete();
+  await addToList(productId);
+  clearSearch();
+}
+
+/* ── RECIENTES ── */
+const _RECENTS_KEY = 'compra_recents_v1';
+let _recents = [];
+try { _recents = JSON.parse(localStorage.getItem(_RECENTS_KEY) || '[]'); } catch (_) {}
+
+function pushRecent(prod) {
+  _recents = _recents.filter(r => r.id !== prod.id);
+  _recents.unshift(prod);
+  if (_recents.length > 10) _recents.length = 10;
+  try { localStorage.setItem(_RECENTS_KEY, JSON.stringify(_recents)); } catch (_) {}
+  renderRecents();
+}
+
+function clearRecents() {
+  _recents = [];
+  try { localStorage.removeItem(_RECENTS_KEY); } catch (_) {}
+  renderRecents();
+}
+
+async function reAddRecent(prodId) {
+  _recents = _recents.filter(r => r.id !== prodId);
+  try { localStorage.setItem(_RECENTS_KEY, JSON.stringify(_recents)); } catch (_) {}
+  await addToList(prodId);
+  renderRecents();
+}
+
+function renderRecents() {
+  const sec = document.getElementById('recentsSection');
+  const grid = document.getElementById('recentsGrid');
+  if (!sec || !grid) return;
+  // Ocultar si hay búsqueda activa o no hay recientes
+  const inListIds = new Set(S.listItems.map(i => i.product_id));
+  const visible = _recents.filter(r => !inListIds.has(r.id));
+  if (!visible.length || S.search) { sec.hidden = true; return; }
+  sec.hidden = false;
+  grid.innerHTML = visible.map(r =>
+    `<div class="recent-chip" onpointerdown="reAddRecent('${r.id}')">
+      <span class="recent-chip-emoji">${r.emoji}</span>
+      <span>${esc(r.name)}</span>
+    </div>`
+  ).join('');
 }
 
 async function clearPurchased() {
@@ -746,7 +907,9 @@ function clearSearch() {
   el.value = '';
   S.search = '';
   document.getElementById('searchClear').style.display = 'none';
+  closeAutocomplete();
   renderCatalog();
+  renderRecents();
   el.focus();
 }
 
@@ -755,6 +918,7 @@ function render() {
   renderList();
   renderPills();
   renderCatalog();
+  renderRecents();
 }
 
 function renderList() {
