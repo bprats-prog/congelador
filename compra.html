@@ -595,7 +595,7 @@ function cardVisual(name, em) {
   const key = name?.toLowerCase();
   if (CUSTOM_ICONS[key]) {
     const fb = em.replace(/'/g, '&#39;');
-    return `<img class="card-img" src="${CUSTOM_ICONS[key]}" alt="${fb}" style="filter:invert(1)" onerror="this.outerHTML='<span class=card-emoji>${fb}</span>'">`;
+    return `<img class="card-img" src="${CUSTOM_ICONS[key]}" alt="${fb}" style="filter:invert(1);mix-blend-mode:screen" onerror="this.outerHTML='<span class=card-emoji>${fb}</span>'">`;
   }
   const url = bringIconUrl(name);
   if (!url) return `<span class="card-emoji">${em}</span>`;
