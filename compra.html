@@ -515,6 +515,10 @@ const S = {
 };
 let _bringIconMap = {};
 
+const CUSTOM_ICONS = {
+  'pan': 'icons/pan.png',
+};
+
 /* ── INIT ── */
 async function init() {
   await loadAll();
@@ -588,6 +592,11 @@ function bringIconUrl(name) {
 }
 
 function cardVisual(name, em) {
+  const key = name?.toLowerCase();
+  if (CUSTOM_ICONS[key]) {
+    const fb = em.replace(/'/g, '&#39;');
+    return `<img class="card-img" src="${CUSTOM_ICONS[key]}" alt="${fb}" style="filter:invert(1)" onerror="this.outerHTML='<span class=card-emoji>${fb}</span>'">`;
+  }
   const url = bringIconUrl(name);
   if (!url) return `<span class="card-emoji">${em}</span>`;
   const fb = em.replace(/'/g, '&#39;');
