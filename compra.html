@@ -22,8 +22,8 @@
   --border:  rgba(255,255,255,0.07);
   --red:     #E8594A;
   --red-d:   #C94535;
-  --green:   #3DBE7A;
-  --green-d: #2DA067;
+  --green:   #4EC9A8;
+  --green-d: #38B092;
   --teal:    #2FBFAA;
   --teal-d:  #22A08E;
   --font:    'DM Sans', system-ui, sans-serif;
@@ -521,7 +521,6 @@ async function init() {
   setupRealtime();
   render();
   document.getElementById('loading').style.display = 'none';
-  loadBringCatalog();
 
   document.getElementById('searchInput').addEventListener('input', e => {
     S.search = e.target.value.trim().toLowerCase();
@@ -991,7 +990,7 @@ function renderList() {
       oncontextmenu="ctxCard(event,'${item.id}')"
       title="Mantén pulsado para eliminar">
       ${bought ? '<div class="check-badge">✓</div>' : ''}
-      ${cardVisual(nm, em)}
+      <span class="card-emoji">${em}</span>
       <span class="card-name">${esc(nm)}</span>
     </div>`;
   }).join('');
@@ -1058,7 +1057,7 @@ function renderCatalog() {
     return `<div class="card card-cat"
       style="background:${color}"
       onclick="addToList('${p.id}')">
-      ${cardVisual(p.name, p.emoji)}
+      <span class="card-emoji">${p.emoji}</span>
       <span class="card-name">${esc(p.name)}</span>
     </div>`;
   }).join('');
