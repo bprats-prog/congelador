@@ -521,6 +521,7 @@ async function init() {
   setupRealtime();
   render();
   document.getElementById('loading').style.display = 'none';
+  loadBringCatalog();
 
   document.getElementById('searchInput').addEventListener('input', e => {
     S.search = e.target.value.trim().toLowerCase();
@@ -1057,7 +1058,7 @@ function renderCatalog() {
     return `<div class="card card-cat"
       style="background:${color}"
       onclick="addToList('${p.id}')">
-      <span class="card-emoji">${p.emoji}</span>
+      ${cardVisual(p.name, p.emoji)}
       <span class="card-name">${esc(p.name)}</span>
     </div>`;
   }).join('');
