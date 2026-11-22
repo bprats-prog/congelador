@@ -244,9 +244,15 @@ header {
 .card-emoji {
   font-size: 2.1rem;
   line-height: 1;
-  /* white line-art feel via brightness filter on emoji */
   filter: brightness(10) saturate(0);
 }
+.card-img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  pointer-events: none;
+}
+.card-purchased .card-img { opacity: 0.7; }
 .card-name {
   font-size: 0.66rem;
   font-weight: 600;
@@ -507,6 +513,7 @@ const S = {
   activeCat:  'all',
   search:     '',
 };
+let _bringIconMap = {};
 
 /* ── INIT ── */
 async function init() {
@@ -514,6 +521,7 @@ async function init() {
   setupRealtime();
   render();
   document.getElementById('loading').style.display = 'none';
+  loadBringCatalog();
 
   document.getElementById('searchInput').addEventListener('input', e => {
     S.search = e.target.value.trim().toLowerCase();
@@ -551,6 +559,39 @@ async function loadAll() {
   S.categories = catR.data || [];
   S.products   = prodR.data || [];
   S.listItems  = listR.data || [];
+}
+
+async function loadBringCatalog() {
+  try {
+    const r = await fetch('https://web.getbring.com/locale/catalog.es-ES.json');
+    if (!r.ok) return;
+    const data = await r.json();
+    const map = {};
+    for (const sec of (data.catalog?.sections || [])) {
+      for (const item of (sec.items || [])) {
+        if (item.name && item.itemId) {
+          const id = item.itemId.toLowerCase()
+            .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/é/g,'e')
+            .replace(/[\s-]/g,'_').replace(/!/g,'');
+          map[item.name.toLowerCase()] = id;
+        }
+      }
+    }
+    _bringIconMap = map;
+    render();
+  } catch {}
+}
+
+function bringIconUrl(name) {
+  const id = _bringIconMap[name?.toLowerCase()];
+  return id ? `https://web.getbring.com/assets/images/items/${id}.png` : null;
+}
+
+function cardVisual(name, em) {
+  const url = bringIconUrl(name);
+  if (!url) return `<span class="card-emoji">${em}</span>`;
+  const fb = em.replace(/'/g, '&#39;');
+  return `<img class="card-img" src="${url}" alt="${fb}" onerror="this.outerHTML='<span class=card-emoji>${fb}</span>'">`;
 }
 
 /* ── REALTIME ── */
@@ -950,7 +991,7 @@ function renderList() {
       oncontextmenu="ctxCard(event,'${item.id}')"
       title="Mantén pulsado para eliminar">
       ${bought ? '<div class="check-badge">✓</div>' : ''}
-      <span class="card-emoji">${em}</span>
+      ${cardVisual(nm, em)}
       <span class="card-name">${esc(nm)}</span>
     </div>`;
   }).join('');
@@ -1017,7 +1058,7 @@ function renderCatalog() {
     return `<div class="card card-cat"
       style="background:${color}"
       onclick="addToList('${p.id}')">
-      <span class="card-emoji">${p.emoji}</span>
+      ${cardVisual(p.name, p.emoji)}
       <span class="card-name">${esc(p.name)}</span>
     </div>`;
   }).join('');
